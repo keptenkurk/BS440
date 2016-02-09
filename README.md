@@ -31,3 +31,4 @@ V1.1 Commits 090216
 + program parameters moved to ini file
 + removed references to "Medisana" to avoid legal issues
 + updated readme 
++ PR2, PR3 fixed
