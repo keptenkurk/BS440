@@ -1,4 +1,5 @@
 from struct import *
+import sys
 '''
 Reads Medisana BS440 Scale hex Indication and decodes scale
 values from hex data string
@@ -57,7 +58,10 @@ def decodeWeight(handle, values):
     retDict = {}
     retDict["valid"] = (handle == 0x1b and data[0] == 0x1d)
     retDict["weight"] = data[1]/100.0
-    retDict["timestamp"] = data[2]
+    if data[2] < sys.maxint:
+        retDict["timestamp"] = data[2]
+    else:
+        retDict["timestamp"] = 0
     retDict["person"] = data[3]
     return retDict
 
@@ -81,7 +85,10 @@ def decodeBody(handle, values):
     data = unpack('<BIBHHHHH', bytes(values[0:16]))
     retDict = {}
     retDict["valid"] = (handle == 0x1e and data[0] == 0x6f)
-    retDict["timestamp"] = data[1]
+    if data[1] < sys.maxint:
+        retDict["timestamp"] = data[1]
+    else:
+        retDict["timestamp"] = 0
     retDict["person"] = data[2]
     retDict["kcal"] = data[3]
     retDict["fat"] = (0x0fff & data[4])/10.0
