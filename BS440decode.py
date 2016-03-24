@@ -26,7 +26,6 @@ def decodePerson(handle, values):
     data = unpack('BxBxBBBxB', bytes(values[0:9]))
     retDict = {}
     retDict["valid"] = (handle == 0x25 and data[0] == 0x84)
-    retDict["type"] = 'person'
     retDict["person"] = data[1]
     if data[2] == 1:
         retDict["gender"] = "male"

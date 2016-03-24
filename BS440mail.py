@@ -12,6 +12,45 @@ def TimeToString(unixtime):
     return returnstr
 
 
+def printcolor(value1, value2, biggerisbetter):
+    black = '000000'
+    red = 'FF0000'
+    green = '00FF00'
+    if value1 == value2:
+        color = black
+    if value1 > value2:
+        if biggerisbetter:
+            color = green
+        else:
+            color = red
+    if value1 < value2:
+        if biggerisbetter:
+            color = red
+        else:
+            color = green
+    return color
+
+
+def rowdata(header, dataset, property, bib):
+    if property == 'timestamp':
+        valstr2 = TimeToString(dataset[2][property])
+        valstr1 = TimeToString(dataset[1][property])
+        valstr0 = TimeToString(dataset[0][property])
+        rowstr = '<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>' % (
+                  header, valstr2, valstr1, valstr0)
+    else:
+        valstr2 = str(dataset[2][property])
+        valstr1 = str(dataset[1][property])
+        valstr0 = str(dataset[0][property])
+        color1 = printcolor(dataset[1][property], dataset[2][property], bib)
+        color0 = printcolor(dataset[0][property], dataset[1][property], bib)
+        rowstr = '<tr><td>%s</td><td>%s</td>' \
+                 '<td><font color=%s>%s</font></td>' \
+                 '<td><font color=%s>%s</font></td></tr>' % (
+                  header, valstr2, color1, valstr1, color0, valstr0)
+    return rowstr
+
+
 def BS440mail(config, persondata, weightdata, bodydata):
     log = logging.getLogger(__name__)
     FromAddr = config.get('Program', 'sender_email')
@@ -23,7 +62,8 @@ def BS440mail(config, persondata, weightdata, bodydata):
         ToName = config.get(personsection, 'username')
         ToAddr = [config.get(personsection, 'useremail')]
     else:
-        log.error('Unable to send mail: No details found in ini file for person %d' % (persondata[0]['person']))
+        log.error('Unable to send mail: No details found in ini file '
+                  'for person %d' % (persondata[0]['person']))
         return
 
     # Sort scale output to retrieve most recent three results
@@ -37,7 +77,7 @@ def BS440mail(config, persondata, weightdata, bodydata):
             <head>
             <style>
             table {
-                width:100%;
+                width:100%%;
             }
             table, th, td {
                 border: 1px solid black;
@@ -60,52 +100,11 @@ def BS440mail(config, persondata, weightdata, bodydata):
             </style>
             </head>
             <body>
-            <p>Beste """ + ToName + """<br>
-            Je hebt zojuist op de weegschaal gestaan. Dit is een overzicht van je laatste 3 metingen:<br>
+            <p>Beste %s<br>
+            Je hebt zojuist op de weegschaal gestaan.<br>
+            Dit is een overzicht van je laatste 3 metingen:<br>
             <br>
-            <table id="t01">
-              <tr>
-                <th>Datum</th>
-                <th>""" + TimeToString(wds[2]['timestamp']) + """</th>
-                <th>""" + TimeToString(wds[1]['timestamp']) + """</th>
-                <th>""" + TimeToString(wds[0]['timestamp']) + """</th>
-              </tr>
-              <tr>
-                <td>Gewicht (kg)</td>
-                <td>""" + str(wds[2]['weight']) + """</td>
-                <td>""" + str(wds[1]['weight']) + """</td>
-                <td>""" + str(wds[0]['weight']) + """</td>
-              </tr>
-              <tr>
-                <td>Vet (%)</td>
-                <td>""" + str(bds[2]['fat']) + """</td>
-                <td>""" + str(bds[1]['fat']) + """</td>
-                <td>""" + str(bds[0]['fat']) + """</td>
-              </tr>
-              <tr>
-                <td>Spieren (%)</td>
-                <td>""" + str(bds[2]['muscle']) + """</td>
-                <td>""" + str(bds[1]['muscle']) + """</td>
-                <td>""" + str(bds[0]['muscle']) + """</td>
-              </tr>
-              <tr>
-                <td>Botten (kg)</td>
-                <td>""" + str(bds[2]['bone']) + """</td>
-                <td>""" + str(bds[1]['bone']) + """</td>
-                <td>""" + str(bds[0]['bone']) + """</td>
-              </tr>
-              <tr>
-                <td>Water (%)</td>
-                <td>""" + str(bds[2]['tbw']) + """</td>
-                <td>""" + str(bds[1]['tbw']) + """</td>
-                <td>""" + str(bds[0]['tbw']) + """</td>
-              </tr>
-              <tr>
-                <td>Verbruik (kcal)</td>
-                <td>""" + str(bds[2]['kcal']) + """</td>
-                <td>""" + str(bds[1]['kcal']) + """</td>
-                <td>""" + str(bds[0]['kcal']) + """</td>
-              </tr>
+            <table id="t01">%s%s%s%s%s%s%s
             </table>
             <br>
             <br>
@@ -114,7 +113,23 @@ def BS440mail(config, persondata, weightdata, bodydata):
             </p>
         </body>
     </html>
-    """
+    """ % (
+     ToName,
+     rowdata(header='Datum', dataset=wds, property='timestamp',
+             bib=True),
+     rowdata(header='Gewicht (kg)', dataset=wds, property='weight',
+             bib=False),
+     rowdata(header='Vet (%)', dataset=bds, property='fat',
+             bib=False),
+     rowdata(header='Spieren (%)', dataset=bds, property='muscle',
+             bib=True),
+     rowdata(header='Botten (kg)', dataset=bds, property='bone',
+             bib=True),
+     rowdata(header='Water (%)', dataset=bds, property='tbw',
+             bib=True),
+     rowdata(header='Verbruik (kCal)', dataset=bds, property='kcal',
+             bib=False))
+
     msg = email.mime.Multipart.MIMEMultipart()
     msg['Subject'] = 'Je nieuwe gewicht'
     msg['From'] = FromAddr
