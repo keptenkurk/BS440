@@ -1,6 +1,9 @@
 # BS440
 Python code to talk to Medisana BS440 bluetooth enabled bathroom scale
 
+# Blog info
+https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-bluetooth-scale/
+
 # Prequisits
 * Installed Pygatt
 * Installed BLE adapter
@@ -21,14 +24,5 @@ Before using this program change the settings in the ini file
 WIP is storing data into a database and graphing them in a web page
 
 # Disclaimer
-This softwrae is build out of personal interest and not related to 
+This software is build out of personal interest and not related to 
 Medisana AG in any way.
-
-History
-==========
-V1.1 Commits 090216
-+ mail last 3 results to user
-+ program parameters moved to ini file
-+ removed references to "Medisana" to avoid legal issues
-+ updated readme 
-+ PR2, PR3 fixed
