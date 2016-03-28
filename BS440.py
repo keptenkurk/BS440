@@ -8,6 +8,7 @@ from struct import *
 from binascii import hexlify
 from BS440decode import *
 from BS440mail import *
+from BS440domoticz import *
 
 
 def processIndication(handle, values):
@@ -146,8 +147,11 @@ while True:
                 time.sleep(30)
                 device.disconnect()
                 log.info('Done receiving data from scale')
-                # mail data if all received well
+                # process data if all received well
                 if persondata and weightdata and bodydata:
-                    BS440mail(config, persondata, weightdata, bodydata)
+                    if config.has_section('Email'):
+                        BS440mail(config, persondata, weightdata, bodydata)
+                    if config.has_section('Domoticz'):
+                        UpdateDomoticz(config, weightdata)
                 else:
-                    log.error('Incomplete data received. Unable to send mail')
+                    log.error('Unreliable data received. Unable to process')

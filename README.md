@@ -14,8 +14,10 @@ https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-blueto
 
 # Description
 In it's current state this program listens for data from a BS440 
-bluetooth scale. Once connected, data is read from the scale and
-the last 3 stored sets of data will be mailed to the user.
+bluetooth scale. Once connected, data is read from the scale. Depending
+on the config in ini the program will
+* mail the last 3 stored sets of data to the user
+* update a virtual sensor in Domoticz home automation system
 
 # ini file
 Before using this program change the settings in the ini file

@@ -53,9 +53,9 @@ def rowdata(header, dataset, property, bib):
 
 def BS440mail(config, persondata, weightdata, bodydata):
     log = logging.getLogger(__name__)
-    FromAddr = config.get('Program', 'sender_email')
-    Password = config.get('Program', 'sender_pwd')
-    CcAddr = [config.get('Program', 'sender_email')]
+    FromAddr = config.get('Email', 'sender_email')
+    Password = config.get('Email', 'sender_pwd')
+    CcAddr = [config.get('Email', 'sender_email')]
 
     personsection = 'Person' + str(persondata[0]['person'])
     if config.has_section(personsection):
