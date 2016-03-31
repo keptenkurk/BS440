@@ -21,16 +21,25 @@ def processIndication(handle, values):
     '''
     if handle == 0x25:
         result = decodePerson(handle, values)
-        log.info(str(result))
-        persondata.append(result)
+        if result not in persondata:
+            log.info(str(result))
+            persondata.append(result)
+        else:
+            log.info('Duplicate persondata record')
     elif handle == 0x1b:
         result = decodeWeight(handle, values)
-        log.info(str(result))
-        weightdata.append(result)
+        if result not in weightdata:
+            log.info(str(result))
+            weightdata.append(result)
+        else:
+            log.info('Duplicate weightdata record')
     elif handle == 0x1e:
         result = decodeBody(handle, values)
-        log.info(str(result))
-        bodydata.append(result)
+        if result not in bodydata:
+            log.info(str(result))
+            bodydata.append(result)
+        else:
+            log.info('Duplicate bodydata record')
     else:
         log.debug('Unhandled Indication encountered')
 
@@ -149,9 +158,12 @@ while True:
                 log.info('Done receiving data from scale')
                 # process data if all received well
                 if persondata and weightdata and bodydata:
+                    # Sort scale output by timestamp to retrieve most recent three results
+                    weightdatasorted = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
+                    bodydatasorted = sorted(bodydata, key=lambda k: k['timestamp'], reverse=True)
                     if config.has_section('Email'):
-                        BS440mail(config, persondata, weightdata, bodydata)
+                        BS440mail(config, persondata, weightdatasorted, bodydatasorted)
                     if config.has_section('Domoticz'):
-                        UpdateDomoticz(config, weightdata)
+                        UpdateDomoticz(config, weightdatasorted)
                 else:
                     log.error('Unreliable data received. Unable to process')

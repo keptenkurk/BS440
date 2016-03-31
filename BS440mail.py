@@ -66,10 +66,6 @@ def BS440mail(config, persondata, weightdata, bodydata):
                   'for person %d' % (persondata[0]['person']))
         return
 
-    # Sort scale output to retrieve most recent three results
-    wds = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
-    bds = sorted(bodydata, key=lambda k: k['timestamp'], reverse=True)
-
     # Build HTML e-mail content
     content = """
     <html>
@@ -115,19 +111,19 @@ def BS440mail(config, persondata, weightdata, bodydata):
     </html>
     """ % (
      ToName,
-     rowdata(header='Datum', dataset=wds, property='timestamp',
+     rowdata(header='Datum', dataset=weightdata, property='timestamp',
              bib=True),
-     rowdata(header='Gewicht (kg)', dataset=wds, property='weight',
+     rowdata(header='Gewicht (kg)', dataset=weightdata, property='weight',
              bib=False),
-     rowdata(header='Vet (%)', dataset=bds, property='fat',
+     rowdata(header='Vet (%)', dataset=bodydata, property='fat',
              bib=False),
-     rowdata(header='Spieren (%)', dataset=bds, property='muscle',
+     rowdata(header='Spieren (%)', dataset=bodydata, property='muscle',
              bib=True),
-     rowdata(header='Botten (kg)', dataset=bds, property='bone',
+     rowdata(header='Botten (kg)', dataset=bodydata, property='bone',
              bib=True),
-     rowdata(header='Water (%)', dataset=bds, property='tbw',
+     rowdata(header='Water (%)', dataset=bodydata, property='tbw',
              bib=True),
-     rowdata(header='Verbruik (kCal)', dataset=bds, property='kcal',
+     rowdata(header='Verbruik (kCal)', dataset=bodydata, property='kcal',
              bib=False))
 
     msg = email.mime.Multipart.MIMEMultipart()
