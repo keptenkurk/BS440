@@ -56,7 +56,6 @@ def BS440mail(config, persondata, weightdata, bodydata):
     FromAddr = config.get('Email', 'sender_email')
     Password = config.get('Email', 'sender_pwd')
     CcAddr = [config.get('Email', 'sender_email')]
-
     personsection = 'Person' + str(persondata[0]['person'])
     if config.has_section(personsection):
         ToName = config.get(personsection, 'username')
@@ -65,6 +64,15 @@ def BS440mail(config, persondata, weightdata, bodydata):
         log.error('Unable to send mail: No details found in ini file '
                   'for person %d' % (persondata[0]['person']))
         return
+        
+    # calculate bmi data list
+    calculateddata = []
+    size = persondata[0]['size'] / 100.00
+    for i in range(0, 3):
+        bmiDict = {}
+        bmiDict['bmi'] = round(weightdata[i]['weight'] / (size * size), 1)
+        calculateddata.append(bmiDict)
+        
 
     # Build HTML e-mail content
     content = """
@@ -100,7 +108,7 @@ def BS440mail(config, persondata, weightdata, bodydata):
             Je hebt zojuist op de weegschaal gestaan.<br>
             Dit is een overzicht van je laatste 3 metingen:<br>
             <br>
-            <table id="t01">%s%s%s%s%s%s%s
+            <table id="t01">%s%s%s%s%s%s%s%s
             </table>
             <br>
             <br>
@@ -124,6 +132,8 @@ def BS440mail(config, persondata, weightdata, bodydata):
      rowdata(header='Water (%)', dataset=bodydata, property='tbw',
              bib=True),
      rowdata(header='Verbruik (kCal)', dataset=bodydata, property='kcal',
+             bib=False),
+     rowdata(header='BMI', dataset=calculateddata, property='bmi',
              bib=False))
 
     msg = email.mime.Multipart.MIMEMultipart()
