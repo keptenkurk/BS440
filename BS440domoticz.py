@@ -9,8 +9,6 @@ import logging
 
 def UpdateDomoticz(config, weightdata):
     log = logging.getLogger(__name__)
-    # sort to have list starting with most recent weight
-    weightdata = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
     domoticzurl = config.get('Domoticz', 'domoticz_url')
     domoticzuser = config.get('Domoticz', 'domoticz_user')
     domoticzpwd = config.get('Domoticz', 'domoticz_pwd')
