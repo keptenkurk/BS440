@@ -168,7 +168,7 @@ while True:
                     if config.has_section('Domoticz'):
                         UpdateDomoticz(config, weightdatasorted)
                     if config.has_section('Google'):
-                        UpdateGoogle(config, persondata, weightdatasorted)
+                        UpdateGoogle(config, persondata, weightdatasorted, bodydatasorted)
                         log.info('Google')
                 else:
                     log.error('Unreliable data received. Unable to process')
