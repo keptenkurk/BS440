@@ -31,20 +31,12 @@ def GetGoogleClient(filename):
   log.info("Google client created")
   return client
 
-def AddGoogleWeight(googleClient, weight, googleauthfile): 
-  log = logging.getLogger(__name__)  
-  minLogNs = nano(time.time())
-  maxLogNs = nano(time.time())
-  datasetId = '%s-%s' % (minLogNs, maxLogNs)
-  log.info('Created a new dataset: %s' % (datasetId))
-
-  dataSource = dict(
+def CreateDataSource(newDataType):
+  """Return a specific DataSource based on a generic skeleton. Needs a dict."""
+  return dict(
     type='raw',
     application=dict(name='BS440'),
-    dataType=dict(
-      name='com.google.weight',
-      field=[dict(format='floatPoint', name='weight')]
-    ),
+    dataType=newDataType,
     device=dict(
       type='scale',
       manufacturer='unknown',
@@ -54,8 +46,8 @@ def AddGoogleWeight(googleClient, weight, googleauthfile):
     )
   )
 
-  dataSourceId = GetDataSourceId(googleClient, dataSource, googleauthfile)
-  # Ensure datasource exists for the device.
+def CheckDataSource(googleClient, dataSourceId, dataSource):
+  """Ensure datasource exists for the device or create if not"""
   try:
     googleClient.users().dataSources().get(
       userId='me',
@@ -63,11 +55,30 @@ def AddGoogleWeight(googleClient, weight, googleauthfile):
   except HttpError, error:
     if not 'DataSourceId not found' in str(error):
       raise error
-    # Doesn't exist, so create it.
     googleClient.users().dataSources().create(
       userId='me',
       body=dataSource).execute()
 
+def AddGoogleWeight(googleClient, value, googleauthfile): 
+  log = logging.getLogger(__name__)  
+
+  minLogNs = nano(time.time())
+  maxLogNs = nano(time.time())
+  datasetId = '%s-%s' % (minLogNs, maxLogNs)
+
+  log.info('Created a new dataset: %s' % (datasetId))
+
+  dataName='com.google.weight'
+
+  dataType=dict(
+      name=dataName,
+      field=[dict(format='floatPoint', name='weight')]
+    )
+  dataSource = CreateDataSource(dataType)
+  dataSourceId = GetDataSourceId(googleClient, CreateDataSource(dataType), googleauthfile)
+
+  # if data source does not exiest, create it
+  CheckDataSource(googleClient, dataSourceId, dataSource)
   log.info('Data Source ID: %s' % (dataSourceId))
 
   googleClient.users().dataSources().datasets().patch(
@@ -79,10 +90,47 @@ def AddGoogleWeight(googleClient, weight, googleauthfile):
         maxEndTimeNs=maxLogNs,
         minStartTimeNs=minLogNs,
         point=[dict(
-          dataTypeName='com.google.weight',
+          dataTypeName=dataName,
           endTimeNanos=maxLogNs,
           startTimeNanos=minLogNs,
-          value=[dict(fpVal=weight)],),],
+          value=[dict(fpVal=value)],),],
+      )).execute()
+
+def AddGoogleFat(googleClient, value, googleauthfile): 
+  log = logging.getLogger(__name__)  
+
+  minLogNs = nano(time.time())
+  maxLogNs = nano(time.time())
+  datasetId = '%s-%s' % (minLogNs, maxLogNs)
+  
+  log.info('Created a new dataset: %s' % (datasetId))
+
+  dataName='com.google.body.fat.percentage'
+
+  dataType=dict(
+      name=dataName,
+      field=[dict(format='floatPoint', name='percentage')]
+    )
+  dataSource = CreateDataSource(dataType)
+  dataSourceId = GetDataSourceId(googleClient, dataSource, googleauthfile)
+
+  # if data source does not exiest, create it
+  CheckDataSource(googleClient, dataSourceId, dataSource)
+  log.info('Data Source ID: %s' % (dataSourceId))
+
+  googleClient.users().dataSources().datasets().patch(
+      userId='me',
+      dataSourceId=dataSourceId,
+      datasetId=datasetId,
+      body=dict(
+        dataSourceId=dataSourceId,
+        maxEndTimeNs=maxLogNs,
+        minStartTimeNs=minLogNs,
+        point=[dict(
+          dataTypeName=dataName,
+          endTimeNanos=maxLogNs,
+          startTimeNanos=minLogNs,
+          value=[dict(fpVal=value)],),],
       )).execute()
 
 def GetDataSourceId(googleClient, dataSource, googleauthfile):
@@ -96,12 +144,11 @@ def GetDataSourceId(googleClient, dataSource, googleauthfile):
     dataSource['device']['model'],
     dataSource['device']['uid']))
 
-
 def nano(val):
   """Converts a number to nano (str)."""
   return '%d' % (val * 1e9)
 
-def UpdateGoogle(config, persondata, weightdata):
+def UpdateGoogle(config, persondata, weightdata, bodydata):
   log = logging.getLogger(__name__) 
 
   personsection = 'Person' + str(weightdata[0]['person'])
@@ -111,5 +158,6 @@ def UpdateGoogle(config, persondata, weightdata):
     log.info('Updating Google Fit for user %s with weight %s and google authfile: %s' % (scaleuser, weightdata[0]['weight'], googleauthfile))
     googleClient = GetGoogleClient(googleauthfile)
     AddGoogleWeight(googleClient, weightdata[0]['weight'], googleauthfile)
+    AddGoogleFat(googleClient, bodata[0]['fat'], googleauthfile)
   except:
     log.error('Unable to update Google Fit: Error sending data.')
