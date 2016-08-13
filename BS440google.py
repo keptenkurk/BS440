@@ -158,6 +158,6 @@ def UpdateGoogle(config, persondata, weightdata, bodydata):
     log.info('Updating Google Fit for user %s with weight %s and google authfile: %s' % (scaleuser, weightdata[0]['weight'], googleauthfile))
     googleClient = GetGoogleClient(googleauthfile)
     AddGoogleWeight(googleClient, weightdata[0]['weight'], googleauthfile)
-    AddGoogleFat(googleClient, bodata[0]['fat'], googleauthfile)
+    AddGoogleFat(googleClient, bodydata[0]['fat'], googleauthfile)
   except:
     log.error('Unable to update Google Fit: Error sending data.')
