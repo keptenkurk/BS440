@@ -1,5 +1,6 @@
 # BS440
 Python code to talk to Medisana BS440 bluetooth enabled bathroom scale
+User managementboy reports succes with the Medisana BS444 too.
 
 # Blog info
 https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-bluetooth-scale/
@@ -15,15 +16,15 @@ https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-blueto
 # Description
 In it's current state this program listens for data from a BS440 
 bluetooth scale. Once connected, data is read from the scale. Depending
-on the config in ini the program will
-* mail the last 3 stored sets of data to the user
-* update a virtual sensor in Domoticz home automation system
+on the config in ini the program will then
+* mail the last 3 stored sets of data to the user and/or
+* update a virtual sensor in Domoticz home automation system and/or
+* update weight and fat parameters in Google fit (http://fit.google.com)
+  For creating an account and authentication file please see the Wiki for this
+  repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 
 # ini file
-Before using this program change the settings in the ini file
-
-# Future
-WIP is storing data into a database and graphing them in a web page
+Before using this program personalize the settings in the ini file
 
 # Disclaimer
 This software is build out of personal interest and not related to 
