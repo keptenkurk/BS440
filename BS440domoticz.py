@@ -16,6 +16,8 @@ def UpdateDomoticz(config, weightdata):
     if config.has_section(personsection):
         domoticzid = config.get(personsection, 'domoticz_id')
         scaleuser = config.get(personsection, 'username')
+        domoticzhid = config.get(personsection, 'domoticz_hid')
+        domoticzdunit = config.get(personsection, 'domoticz_dunit')
     else:
         log.error('Unable to update Domoticz: No details found in ini file '
                   'for person %d' % (weightdata[0]['person']))
@@ -23,9 +25,10 @@ def UpdateDomoticz(config, weightdata):
     try:
         log.info('Updating Domoticz for user %s at index %s with weight %s' % (
                   scaleuser, domoticzid, weightdata[0]['weight']))
-        url = 'http://%s/json.htm?type=command&param=udevice&hid=2&' \
-              'did=%s&dunit=4&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
-               domoticzurl, domoticzid, weightdata[0]['weight'])
+        url = 'http://%s/json.htm?type=command&param=udevice&hid=%s&' \
+              'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
+               domoticzurl, domoticzhid, domoticzid, domoticzdunit, 
+               weightdata[0]['weight'])
         log.debug('calling url: %s' % (url))
         req = urllib2.Request(url)
         base64string = base64.encodestring('%s:%s' % (
