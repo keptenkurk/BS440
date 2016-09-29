@@ -26,6 +26,7 @@ def UpdateDomoticz(config, weightdata):
         url = 'http://%s/json.htm?type=command&param=udevice&hid=2&' \
               'did=%s&dunit=4&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
                domoticzurl, domoticzidx, weightdata[0]['weight'])
+        log.debug('calling url: %s' % (url))
         req = urllib2.Request(url)
         base64string = base64.encodestring('%s:%s' % (
                        domoticzuser, domoticzpwd)).replace('\n', '')
