@@ -10,8 +10,6 @@ import logging
 def UpdateDomoticz(config, weightdata):
     log = logging.getLogger(__name__)
     domoticzurl = config.get('Domoticz', 'domoticz_url')
-    domoticzuser = config.get('Domoticz', 'domoticz_user')
-    domoticzpwd = config.get('Domoticz', 'domoticz_pwd')
     personsection = 'Person' + str(weightdata[0]['person'])
     if config.has_section(personsection):
         domoticzid = config.get(personsection, 'domoticz_id')
