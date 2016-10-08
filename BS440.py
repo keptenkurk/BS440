@@ -63,7 +63,7 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-            device = adapter.connect(address, 5, 'random')
+            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1
