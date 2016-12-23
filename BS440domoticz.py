@@ -20,6 +20,8 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         kcalid = config.get(personsection, 'kcal_id')
         muscleid = config.get(personsection, 'muscle_id')
         boneid = config.get(personsection, 'bone_id')
+        bonehid = config.get(personsection, 'bone_hid')
+        bonedunit = config.get(personsection, 'bone_dunit')
         tbwid = config.get(personsection, 'tbw_id')
         bmiid = config.get(personsection, 'bmi_id')
         scaleuser = config.get(personsection, 'username')
@@ -47,13 +49,14 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
             #req.add_header('Authorization', 'Basic %s' % base64string)
             #resp = urllib2.urlopen(req)
 
-        """
+
         log.info('Updating Domoticz for user %s at index %s with bone %s' % (
                   scaleuser, boneid, bodydata[0]['bone']))
         callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
               'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
-               domoticzurl, weighthid, boneid, weightdunit,
+               domoticzurl, bonehid, boneid, bonedunit,
                weightdata[0]['bone']),domoticzuser,domoticzpwd)
+
         log.info('Updating Domoticz for user %s at index %s with weight %s' % (
                   scaleuser, weightid, weightdata[0]['weight']))
         callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
