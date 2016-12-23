@@ -20,6 +20,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         muscleid = config.get(personsection, 'muscle_id')
         boneid = config.get(personsection, 'bone_id')
         tbwid = config.get(personsection, 'tbw_id')
+        bwiid = config.get(personsection, 'bwi_id')
         scaleuser = config.get(personsection, 'username')
     else:
         log.error('Unable to update Domoticz: No details found in ini file '
@@ -54,8 +55,10 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
                
         log.info('Updating Domoticz for user %s at index %s with bone %s' % (
                   scaleuser, boneid, bodydata[0]['bone']))
-        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
-               domoticzurl, boneid, bodydata[0]['bone']),domoticzuser,domoticzpwd)
+        callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
+              'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
+               domoticzurl, weighthid, boneid, weightdunit,
+               weightdata[0]['bone']),domoticzuser,domoticzpwd)
                
         log.info('Updating Domoticz for user %s at index %s with calories %s' % (
                   scaleuser, kcalid, bodydata[0]['kcal']))
@@ -66,6 +69,12 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
                   scaleuser, tbwid, bodydata[0]['tbw']))
         callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
+
+        bmi = 22.0 # persondata[
+        log.info('Updating Domoticz for user %s at index %s with BMI %s' % (
+                  scaleuser, bmiid, bodydata[0]['tbw']))
+        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
+               domoticzurl, bmiid, bmi),domoticzuser,domoticzpwd)
 
         log.info('Domoticz succesfully updated')
     except:
