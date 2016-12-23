@@ -8,10 +8,13 @@ https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-blueto
 # Prequisits
 * Installed Pygatt 3.0.0 release
 * Installed BLE adapter
+* Google stuff (or else comment that part out)
 
 # Tested on
 * Raspberry Pi B+ (Linux raspberrypi 4.1.13+ #826 
   PREEMPT Fri Nov 13 20:13:22 GMT 2015 armv6l GNU/Linux).
+* Raspberry Pi 3  (Linux smarthome 4.4.38-v7+ #938 
+  SMP Thu Dec 15 15:22:21 GMT 2016 armv7l GNU/Linux).
 
 # Description
 In it's current state this program listens for data from a BS440 
