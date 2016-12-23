@@ -9,7 +9,7 @@ from binascii import hexlify
 from BS440decode import *
 from BS440mail import *
 from BS440domoticz import *
-#from BS440google import *
+from BS440google import *
 
 def processIndication(handle, values):
     '''
@@ -166,8 +166,8 @@ while True:
                         BS440mail(config, persondata, weightdatasorted, bodydatasorted)
                     if config.has_section('Domoticz'):
                         UpdateDomoticz(config, weightdatasorted, bodydatasorted, persondata)
-                    #if config.has_section('Google'):
-                    #    UpdateGoogle(config, persondata, weightdatasorted, bodydatasorted)
-                    #    log.info('Google')
+                    if config.has_section('Google'):
+                        UpdateGoogle(config, persondata, weightdatasorted, bodydatasorted)
+                        log.info('Google')
                 else:
                     log.error('Unreliable data received. Unable to process')
