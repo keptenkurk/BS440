@@ -39,9 +39,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
             try:
                 response = urllib.urlopen(url)
             except Exception, e:
-                print e
-                print url
-                log.error('Failed to open url %s' % (url))
+                log.error('Failed to send data to Domoticz (%s)' % (url))
             
             #req = urllib2.Request(url)
             #base64string = base64.encodestring('%s:%s' % (
@@ -74,8 +72,6 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, fatid, bodydata[0]['fat']),domoticzuser,domoticzpwd)
                
-
-               
         log.info('Updating Domoticz for user %s at index %s with calories %s' % (
                   scaleuser, kcalid, bodydata[0]['kcal']))
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
@@ -86,15 +82,18 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
 
-        bmi = 22.0 # weightdata[0]['weight'] / (length * length) # persondata[
+        size = 1
+        for i in persondata:
+            print i
+            if i['person'] == bodydata[0]['person']
+                size = i['size'] / 100.0
+                print size
+        bmi = weightdata[0]['weight'] / (size * size)
         log.info('Updating Domoticz for user %s at index %s with BMI %s' % (
                   scaleuser, bmiid, bodydata[0]['tbw']))
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, bmiid, bmi),domoticzuser,domoticzpwd)
 
         log.info('Domoticz succesfully updated')
-    except Exception, e:
-        print str(e)
-        
-
-        log.error('Unable to update Domoticz: Error sending data.')
+    except:
+        log.error('Failed to update Domoticz')

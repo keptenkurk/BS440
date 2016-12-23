@@ -7,15 +7,9 @@ import subprocess
 from struct import *
 from binascii import hexlify
 from BS440decode import *
-#from BS440mail import *
+from BS440mail import *
 from BS440domoticz import *
 #from BS440google import *
-
-
-# It should be possible to set the date, i seen it in de docs..
-# I have not looked at it, but can you also set the heigh, active(?) & length?
-# It would be nice to set your age on your birthday...
-# And does this frequent scanning affect the battery life of other small devices?
 
 def processIndication(handle, values):
     '''
@@ -168,8 +162,8 @@ while True:
                     # Sort scale output by timestamp to retrieve most recent three results
                     weightdatasorted = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
                     bodydatasorted = sorted(bodydata, key=lambda k: k['timestamp'], reverse=True)
-                    #if config.has_section('Email'):
-                    #    BS440mail(config, persondata, weightdatasorted, bodydatasorted)
+                    if config.has_section('Email'):
+                        BS440mail(config, persondata, weightdatasorted, bodydatasorted)
                     if config.has_section('Domoticz'):
                         UpdateDomoticz(config, weightdatasorted, bodydatasorted, persondata)
                     #if config.has_section('Google'):
