@@ -37,6 +37,7 @@ def decodePerson(handle, values):
         retDict["activity"] = "high"
     else:
         retDict["activity"] = "normal"
+    print retDict
     return retDict
 
 
@@ -62,6 +63,7 @@ def decodeWeight(handle, values):
     else:
         retDict["timestamp"] = 0
     retDict["person"] = data[3]
+    print retDict
     return retDict
 
 
@@ -94,4 +96,5 @@ def decodeBody(handle, values):
     retDict["tbw"] = (0x0fff & data[5])/10.0
     retDict["muscle"] = (0x0fff & data[6])/10.0
     retDict["bone"] = (0x0fff & data[7])/10.0
+    print retDict
     return retDict
