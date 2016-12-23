@@ -82,12 +82,11 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
 
-        size = 1
         for i in persondata:
             print i
             if i['person'] == bodydata[0]['person']:
                 size = i['size'] / 100.0
-                print size
+
         bmi = weightdata[0]['weight'] / (size * size)
         log.info('Updating Domoticz for user %s at index %s with BMI %s' % (
                   scaleuser, bmiid, bodydata[0]['tbw']))
