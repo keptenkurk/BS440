@@ -63,7 +63,6 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
               'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
                domoticzurl, weighthid, weightid, weightdunit,
                weightdata[0]['weight']),domoticzuser,domoticzpwd)
-        """
 
         log.info('Updating Domoticz for user %s at index %s with muscle %s' % (
                   scaleuser, muscleid, bodydata[0]['muscle']))
