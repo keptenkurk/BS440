@@ -47,19 +47,20 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
             #req.add_header('Authorization', 'Basic %s' % base64string)
             #resp = urllib2.urlopen(req)
 
-        log.info('Updating Domoticz for user %s at index %s with weight %s' % (
-                  scaleuser, weightid, weightdata[0]['weight']))
-        callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
-              'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
-               domoticzurl, weighthid, weightid, weightdunit,
-               weightdata[0]['weight']),domoticzuser,domoticzpwd)
-
+        """
         log.info('Updating Domoticz for user %s at index %s with bone %s' % (
                   scaleuser, boneid, bodydata[0]['bone']))
         callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
               'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
                domoticzurl, weighthid, boneid, weightdunit,
                weightdata[0]['bone']),domoticzuser,domoticzpwd)
+        log.info('Updating Domoticz for user %s at index %s with weight %s' % (
+                  scaleuser, weightid, weightdata[0]['weight']))
+        callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
+              'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
+               domoticzurl, weighthid, weightid, weightdunit,
+               weightdata[0]['weight']),domoticzuser,domoticzpwd)
+        """
 
         log.info('Updating Domoticz for user %s at index %s with muscle %s' % (
                   scaleuser, muscleid, bodydata[0]['muscle']))
@@ -83,7 +84,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
 
-        bmi = 22.0 # persondata[
+        bmi = 22.0 # weightdata[0]['weight'] / (length * length) # persondata[
         log.info('Updating Domoticz for user %s at index %s with BMI %s' % (
                   scaleuser, bmiid, bodydata[0]['tbw']))
         callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
@@ -92,5 +93,6 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         log.info('Domoticz succesfully updated')
     except Exception, e:
         print str(e)
+        
 
         log.error('Unable to update Domoticz: Error sending data.')
