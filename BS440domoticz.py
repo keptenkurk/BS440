@@ -64,30 +64,30 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
 
         log.info('Updating Domoticz for user %s at index %s with muscle %s' % (
                   scaleuser, muscleid, bodydata[0]['muscle']))
-        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
+        callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, muscleid, bodydata[0]['muscle']),domoticzuser,domoticzpwd)
                
         log.info('Updating Domoticz for user %s at index %s with fat %s' % (
                   scaleuser, fatid, bodydata[0]['fat']))
-        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
+        callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, fatid, bodydata[0]['fat']),domoticzuser,domoticzpwd)
                
 
                
         log.info('Updating Domoticz for user %s at index %s with calories %s' % (
                   scaleuser, kcalid, bodydata[0]['kcal']))
-        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
+        callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, kcalid, bodydata[0]['kcal']),domoticzuser,domoticzpwd)
                
         log.info('Updating Domoticz for user %s at index %s with tbw %s' % (
                   scaleuser, tbwid, bodydata[0]['tbw']))
-        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
+        callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
 
         bmi = 22.0 # weightdata[0]['weight'] / (length * length) # persondata[
         log.info('Updating Domoticz for user %s at index %s with BMI %s' % (
                   scaleuser, bmiid, bodydata[0]['tbw']))
-        callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
+        callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, bmiid, bmi),domoticzuser,domoticzpwd)
 
         log.info('Domoticz succesfully updated')
