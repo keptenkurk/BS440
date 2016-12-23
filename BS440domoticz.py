@@ -20,7 +20,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         muscleid = config.get(personsection, 'muscle_id')
         boneid = config.get(personsection, 'bone_id')
         tbwid = config.get(personsection, 'tbw_id')
-        bwiid = config.get(personsection, 'bwi_id')
+        bwiid = config.get(personsection, 'bmi_id')
         scaleuser = config.get(personsection, 'username')
     else:
         log.error('Unable to update Domoticz: No details found in ini file '
