@@ -32,7 +32,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
             req = urllib2.Request(url)
             base64string = base64.encodestring('%s:%s' % (
                        domoticzuser, domoticzpwd)).replace('\n', '')
-            req.add_header('Authorization', 'Basic %s' % base64string)
+            #req.add_header('Authorization', 'Basic %s' % base64string)
             resp = urllib2.urlopen(req)
 
         log.info('Updating Domoticz for user %s at index %s with weight %s' % (
