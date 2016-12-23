@@ -22,6 +22,9 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         tbwid = config.get(personsection, 'tbw_id')
         bwiid = config.get(personsection, 'bmi_id')
         scaleuser = config.get(personsection, 'username')
+        # FIX THIS
+        domoticzuser = ""
+        domoticzpwd = ""
     else:
         log.error('Unable to update Domoticz: No details found in ini file '
                   'for person %d' % (weightdata[0]['person']))
@@ -79,4 +82,5 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         log.info('Domoticz succesfully updated')
     except Exception, e:
         print str(e)
+
         log.error('Unable to update Domoticz: Error sending data.')
