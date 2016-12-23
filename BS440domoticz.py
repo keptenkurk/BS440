@@ -77,5 +77,6 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
                domoticzurl, bmiid, bmi),domoticzuser,domoticzpwd)
 
         log.info('Domoticz succesfully updated')
-    except:
+    except Exception, e:
+        print str(e)
         log.error('Unable to update Domoticz: Error sending data.')
