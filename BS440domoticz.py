@@ -85,7 +85,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         size = 1
         for i in persondata:
             print i
-            if i['person'] == bodydata[0]['person']
+            if i['person'] == bodydata[0]['person']:
                 size = i['size'] / 100.0
                 print size
         bmi = weightdata[0]['weight'] / (size * size)
