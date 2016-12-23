@@ -2,7 +2,8 @@
 BS440domoticz.py
 Update weight value to Domoticz home automation system
 '''
-import urllib2
+#import urllib2
+import urllib
 import base64
 import logging
 
@@ -33,11 +34,16 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         
         def callurl(url, domoticzuser, domoticzpwd):
             log.debug('calling url: %s' % (url))
-            req = urllib2.Request(url)
-            base64string = base64.encodestring('%s:%s' % (
-                       domoticzuser, domoticzpwd)).replace('\n', '')
+            try:
+                response = urllib.urlopen(url)
+            except Exception, e:
+                log.error('Failed to open url %s' % (url))
+            
+            #req = urllib2.Request(url)
+            #base64string = base64.encodestring('%s:%s' % (
+            #           domoticzuser, domoticzpwd)).replace('\n', '')
             #req.add_header('Authorization', 'Basic %s' % base64string)
-            resp = urllib2.urlopen(req)
+            #resp = urllib2.urlopen(req)
 
         log.info('Updating Domoticz for user %s at index %s with weight %s' % (
                   scaleuser, weightid, weightdata[0]['weight']))
