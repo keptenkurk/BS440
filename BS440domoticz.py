@@ -7,7 +7,7 @@ import base64
 import logging
 
 
-def UpdateDomoticz(config, weightdata, bodydatam persondata):
+def UpdateDomoticz(config, weightdata, bodydata, persondata):
     log = logging.getLogger(__name__)
     domoticzurl = config.get('Domoticz', 'domoticz_url')
     personsection = 'Person' + str(weightdata[0]['person'])
