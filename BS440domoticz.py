@@ -37,6 +37,8 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
             try:
                 response = urllib.urlopen(url)
             except Exception, e:
+                print e
+                print url
                 log.error('Failed to open url %s' % (url))
             
             #req = urllib2.Request(url)
@@ -51,7 +53,14 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
               'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
                domoticzurl, weighthid, weightid, weightdunit,
                weightdata[0]['weight']),domoticzuser,domoticzpwd)
-               
+
+        log.info('Updating Domoticz for user %s at index %s with bone %s' % (
+                  scaleuser, boneid, bodydata[0]['bone']))
+        callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
+              'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
+               domoticzurl, weighthid, boneid, weightdunit,
+               weightdata[0]['bone']),domoticzuser,domoticzpwd)
+
         log.info('Updating Domoticz for user %s at index %s with muscle %s' % (
                   scaleuser, muscleid, bodydata[0]['muscle']))
         callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
@@ -62,12 +71,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         callurl('http://%s//json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, fatid, bodydata[0]['fat']),domoticzuser,domoticzpwd)
                
-        log.info('Updating Domoticz for user %s at index %s with bone %s' % (
-                  scaleuser, boneid, bodydata[0]['bone']))
-        callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
-              'did=%s&dunit=%s&dtype=93&dsubtype=1&nvalue=0&svalue=%s' % (
-               domoticzurl, weighthid, boneid, weightdunit,
-               weightdata[0]['bone']),domoticzuser,domoticzpwd)
+
                
         log.info('Updating Domoticz for user %s at index %s with calories %s' % (
                   scaleuser, kcalid, bodydata[0]['kcal']))
