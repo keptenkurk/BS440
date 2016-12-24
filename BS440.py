@@ -11,6 +11,8 @@ from BS440mail import *
 from BS440domoticz import *
 from BS440google import *
 
+
+
 def processIndication(handle, values):
     '''
     Indication handler
@@ -158,7 +160,6 @@ while True:
                 log.info('Done receiving data from scale')
                 # process data if all received well
                 if persondata and weightdata and bodydata:
-                    
                     # Sort scale output by timestamp to retrieve most recent three results
                     weightdatasorted = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
                     bodydatasorted = sorted(bodydata, key=lambda k: k['timestamp'], reverse=True)

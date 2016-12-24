@@ -2,7 +2,7 @@
 BS440domoticz.py
 Update weight value to Domoticz home automation system
 '''
-#import urllib2
+
 import urllib
 import base64
 import logging
@@ -14,8 +14,8 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
     personsection = 'Person' + str(weightdata[0]['person'])
     if config.has_section(personsection):
         weightid = config.get(personsection, 'weight_id')
-        weighthid = config.get(personsection, 'weight_hid')
-        weightdunit = config.get(personsection, 'weight_dunit')
+        weighthid = config.get(personsection, 'weigt_hid')
+        weightdunit = config.get(personsection, 'weigth_dunit')
         fatid = config.get(personsection, 'fat_id')
         kcalid = config.get(personsection, 'kcal_id')
         muscleid = config.get(personsection, 'muscle_id')
@@ -25,9 +25,6 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         tbwid = config.get(personsection, 'tbw_id')
         bmiid = config.get(personsection, 'bmi_id')
         scaleuser = config.get(personsection, 'username')
-        # FIX THIS
-        domoticzuser = ""
-        domoticzpwd = ""
     else:
         log.error('Unable to update Domoticz: No details found in ini file '
                   'for person %d' % (weightdata[0]['person']))
@@ -40,14 +37,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
                 response = urllib.urlopen(url)
             except Exception, e:
                 log.error('Failed to send data to Domoticz (%s)' % (url))
-            
-            #req = urllib2.Request(url)
-            #base64string = base64.encodestring('%s:%s' % (
-            #           domoticzuser, domoticzpwd)).replace('\n', '')
-            #req.add_header('Authorization', 'Basic %s' % base64string)
-            #resp = urllib2.urlopen(req)
-
-
+    
         log.info('Updating Domoticz for user %s at index %s with bone %s' % (
                   scaleuser, boneid, bodydata[0]['bone']))
         callurl('http://%s/json.htm?type=command&param=udevice&hid=%s&' \
@@ -83,7 +73,6 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
 
         for i in persondata:
-            print i
             if i['person'] == bodydata[0]['person']:
                 size = i['size'] / 100.0
 
@@ -95,4 +84,4 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
 
         log.info('Domoticz succesfully updated')
     except:
-        log.error('Failed to update Domoticz')
+        log.error('Unable to update Domoticz: Error sending data.')
