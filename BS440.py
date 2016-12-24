@@ -166,7 +166,7 @@ while True:
                     if config.has_section('Email'):
                         BS440mail(config, persondata, weightdatasorted, bodydatasorted)
                     if config.has_section('Domoticz'):
-                        UpdateDomoticz(config, weightdatasorted)
+                        UpdateDomoticz(config, persondata, weightdatasorted, bodydatasorted)
                     if config.has_section('Google'):
                         UpdateGoogle(config, persondata, weightdatasorted, bodydatasorted)
                         log.info('Google')
