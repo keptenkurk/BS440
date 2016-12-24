@@ -67,7 +67,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, kcalid, bodydata[0]['kcal']),domoticzuser,domoticzpwd)
                
-        log.info('Updating Domoticz for user %s at index %s with tbw %s' % (
+        log.info('Updating Domoticz for user %s at index %s with water %s' % (
                   scaleuser, tbwid, bodydata[0]['tbw']))
         callurl('http://%s/json.htm?type=command&param=udevice&idx=%s&nvalue=0&svalue=%s' % (
                domoticzurl, tbwid, bodydata[0]['tbw']),domoticzuser,domoticzpwd)
