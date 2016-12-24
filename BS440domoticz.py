@@ -22,7 +22,7 @@ def UpdateDomoticz(config, weightdata, bodydata, persondata):
         boneid = config.get(personsection, 'bone_id')
         bonehid = config.get(personsection, 'bone_hid')
         bonedunit = config.get(personsection, 'bone_dunit')
-        tbwid = config.get(personsection, 'tbw_id')
+        tbwid = config.get(personsection, 'water_id')
         bmiid = config.get(personsection, 'bmi_id')
         scaleuser = config.get(personsection, 'username')
     else:

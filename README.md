@@ -31,7 +31,7 @@ You can create the following sensors:
 
 __Virtual sensors__ percentage %
 
-In config file fill in the ids for fat, mussle and tbw: _muscle_id,_ _fat_id_, _tbw_id_
+In config file fill in the ids for fat, mussle and water: _muscle_id,_ _fat_id_, _water_id_
 If sensor not used comment them out.
 
 __Virtual sensors__ custom sensors
