@@ -24,7 +24,26 @@ on the config in ini the program will then
   repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 
 # ini file
-Before using this program personalize the settings in the ini file
+Before using this program personalize the settings in the BS440.ini file
+
+# Domoticz
+Setup up for Domoticz is real easy, just uncomment the following two lines in
+the ini and fill in the right url! Then run it, the sensors will be automatically
+generated.
+
+```
+[Domoticz]
+domoticz_url: 127.0.0.1:8080
+```
+
+The optional option _hardware_name_ is the name of the dummy hardware to use,
+if you leave it empty or commented it uses _Medisana_ as default.
+
+After a first run BS440domoticz.ini is generated. In which you can override
+the id to use. Note that the weight sensors are identified by _ID_ and _Unit_
+while the other sensors are identified by _idx_ in the ini file.
+
+![domoticz](https://raw.githubusercontent.com/Tristan79/BS440/master/BS440domoticz.png)
 
 # Disclaimer
 This software is build out of personal interest and not related to 
