@@ -58,11 +58,13 @@ def UpdateDomoticz(config, persondata, weightdata, bodydata):
             response = urllib.urlopen(url)
         except Exception, e:
             log.error('Failed to send data to Domoticz (%s)' % (url))
-            return '{}'
+            return 'None'
         return response
 
     def exists_hardware(name):
         response = open_url(url_hardware % (domoticzurl))
+        if response == 'None':
+            return 'None'
         data = json.loads(response.read())
         if 'result' in data:
             for i in range(0,len(data['result'])):
@@ -92,6 +94,8 @@ def UpdateDomoticz(config, persondata, weightdata, bodydata):
         global data
         if query:
             response = open_url(url_sensor % (domoticzurl))
+            if response == 'None':
+                return 'None'
             data = json.loads(response.read())
             query = False
         if 'result' in data:
@@ -105,6 +109,8 @@ def UpdateDomoticz(config, persondata, weightdata, bodydata):
         global data
         if query:
             response = open_url(url_sensor % (domoticzurl))
+            if response == 'None':
+                return False
             data = json.loads(response.read())
             query = False
         if 'result' in data:
@@ -118,6 +124,8 @@ def UpdateDomoticz(config, persondata, weightdata, bodydata):
         global data
         if query:
             response = open_url(url_sensor % (domoticzurl))
+            if response == 'None':
+                return ["",""]
             data = json.loads(response.read())
             query = False
         if 'result' in data:
