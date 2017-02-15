@@ -10,6 +10,7 @@ from BS440decode import *
 from BS440mail import *
 from BS440domoticz import *
 from BS440google import *
+from BS440runalyzel import *
 
 
 
@@ -170,5 +171,8 @@ while True:
                     if config.has_section('Google'):
                         UpdateGoogle(config, persondata, weightdatasorted, bodydatasorted)
                         log.info('Google')
+                    if config.has_section('RunalyzeLocal'):
+                        UpdateRunalyzeLocal(config, persondata, weightdatasorted, bodydatasorted)
+                        log.info('Runalyze local')
                 else:
                     log.error('Unreliable data received. Unable to process')
