@@ -53,11 +53,11 @@ while the other sensors are identified by _idx_ in _BS440domoticz.ini_.
 Uncomment the following lines in the _BS440.ini_ and fill in your MySQL-Settings as you used for your Runalyze installation:
 
 ```
-[RunalyzeLocal]
-host: localhost
-user: root
-passwd: insert_your_password_here
-db: runalyze
+#[RunalyzeLocal]
+#host: localhost
+#user: root
+#passwd: enter_your_password_here
+#db: runalyze
 ```
 
 # Disclaimer
