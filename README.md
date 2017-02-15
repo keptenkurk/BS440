@@ -12,6 +12,10 @@ https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-blueto
 # Tested on
 * Raspberry Pi B+ (Linux raspberrypi 4.1.13+ #826 
   PREEMPT Fri Nov 13 20:13:22 GMT 2015 armv6l GNU/Linux).
+  
+# Tested Scales
+* Medisana BS440
+* Medisana BS444
 
 # Description
 BS440 listens for information from a BS440 or compatible bluetooth scale. 
@@ -44,6 +48,17 @@ the ids to use (if necessary). Note that the weight sensors are identified by _I
 while the other sensors are identified by _idx_ in _BS440domoticz.ini_.
 
 ![domoticz](https://raw.githubusercontent.com/Tristan79/BS440/master/BS440domoticz.png)
+
+# Runalyze
+Uncomment the following lines in the _BS440.ini_ and fill in your MySQL-Settings as you used for your Runalyze installation:
+
+```
+[RunalyzeLocal]
+host: localhost
+user: root
+passwd: insert_your_password_here
+db: runalyze
+```
 
 # Disclaimer
 This software is build out of personal interest and not related to 
