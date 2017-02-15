@@ -13,7 +13,7 @@ https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-blueto
 * Raspberry Pi B+ (Linux raspberrypi 4.1.13+ #826 
   PREEMPT Fri Nov 13 20:13:22 GMT 2015 armv6l GNU/Linux).
   
-# Tested Scales
+# Tested scales
 * Medisana BS440
 * Medisana BS444
 
