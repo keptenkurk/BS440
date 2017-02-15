@@ -27,6 +27,7 @@ file _BS440.ini_, to the following possibilities:
 * Update weight and fat parameters in Google fit (http://fit.google.com)
   For creating an account and authentication file please see the Wiki for this
   repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
+* Update weight, water, fat and muscel parameters in Runalyze (https://github.com/Runalyze/Runalyze)
 
 # Preferences
 Before using this app, personalize your settings in the file _BS440.ini_.
