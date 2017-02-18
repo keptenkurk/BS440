@@ -6,10 +6,11 @@ import time
 import subprocess
 from struct import *
 from binascii import hexlify
+import os
+import sys
+
 from BS440decode import *
-from BS440mail import *
-from BS440domoticz import *
-from BS440google import *
+
 
 
 
@@ -86,6 +87,8 @@ Main program loop
 '''
 config = SafeConfigParser()
 config.read('BS440.ini')
+path = "plugins/"
+plugins = {}
 
 # set up logging
 numeric_level = getattr(logging,
@@ -99,6 +102,15 @@ logging.basicConfig(level=numeric_level,
                     filename=config.get('Program', 'logfile'),
                     filemode='w')
 log = logging.getLogger(__name__)
+
+# Search for plugins in subdir "plugins" with name BS440*.py
+sys.path.insert(0, path)
+for f in os.listdir(path):
+    fname, ext = os.path.splitext(f)
+    if ext == '.py' and fname.startswith('BS440'):
+        mod = __import__(fname)
+        plugins[fname] = mod.Plugin()
+sys.path.pop(0)
 
 ble_address = config.get('Scale', 'ble_address')
 device_name = config.get('Scale', 'device_name')
@@ -163,14 +175,9 @@ while True:
                     # Sort scale output by timestamp to retrieve most recent three results
                     weightdatasorted = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
                     bodydatasorted = sorted(bodydata, key=lambda k: k['timestamp'], reverse=True)
-                    if config.has_section('Email'):
-                        BS440mail(config, persondata, weightdatasorted, bodydatasorted)
-                    if config.has_section('CSV'):
-                        BS440csv(config, persondata, weightdatasorted, bodydatasorted)
-                    if config.has_section('Domoticz'):
-                        UpdateDomoticz(config, persondata, weightdatasorted, bodydatasorted)
-                    if config.has_section('Google'):
-                        UpdateGoogle(config, persondata, weightdatasorted, bodydatasorted)
-                        log.info('Google')
+                    
+                    # Run all plugins found
+                    for plugin in plugins.values():
+                        plugin.execute(config, persondata, weightdatasorted, bodydatasorted)
                 else:
                     log.error('Unreliable data received. Unable to process')
