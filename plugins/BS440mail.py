@@ -57,7 +57,7 @@ class Plugin:
         return rowstr
 
 
-    def execute(self, config, persondata, weightdata, bodydata):
+    def execute(self, globalconfig, persondata, weightdata, bodydata):
         log = logging.getLogger(__name__)
         config = SafeConfigParser()
         config.read(__name__ + '.ini')
