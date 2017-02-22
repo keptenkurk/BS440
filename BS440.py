@@ -18,7 +18,7 @@ def processIndication(handle, values):
     '''
     Indication handler
     receives indication and stores values into result Dict
-    (see medisanaBLE for Dict definition)
+    (see BS440decode.py for Dict definition)
     handle: byte
     value: bytearray
     '''
@@ -64,7 +64,9 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
+# use pygatt.BLEAddressType.random from version 3.0.0 of pygatt
+#            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
+            device = adapter.connect(address, 5, 'random')
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1

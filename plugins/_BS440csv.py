@@ -12,6 +12,7 @@
 #------------------------------------------------------------------------------------------
 import logging
 import csv
+from ConfigParser import SafeConfigParser
 
 class Plugin:
 
