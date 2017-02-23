@@ -27,11 +27,9 @@ import math
 
 
 def randomize_a_bit(value):
-    # deviate from value by -5% .. +5%
-    # deviation = 0.95 .. 1.05
-    deviation = 0.95 + random.random() * 0.1
-    newvalue = float(value) * deviation
-    return newvalue
+    # deviate from value by -5% .. +5% rouded to 1 decimal
+    deviation = 9.5 + random.random()
+    return math.ceil(float(value) * deviation) / 10.0
 
 '''
 Main program loop
@@ -94,14 +92,12 @@ for i in range (0,29):
     # generate bodydata per day
     bodydict["timestamp"] = current_timestamp - i * 86400
     bodydict["person"] = config.get('Scaledata', 'person')
-    bodydict["kcal"] = randomize_a_bit(config.get('Scaledata', 'kcal'))
+    bodydict["kcal"] = int(randomize_a_bit(config.get('Scaledata', 'kcal')))
     bodydict["fat"] = randomize_a_bit(config.get('Scaledata', 'fat'))
     bodydict["tbw"] = randomize_a_bit(config.get('Scaledata', 'tbw'))
     bodydict["muscle"] = randomize_a_bit(config.get('Scaledata', 'muscle'))
     bodydict["bone"] = randomize_a_bit(config.get('Scaledata', 'bone'))
     bodydata.append(bodydict)
-
-log.info('Fake scale data generated')
 
 log.info('Done generating testdata')
     # process data if all received well

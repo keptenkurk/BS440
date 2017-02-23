@@ -47,9 +47,9 @@ class Plugin:
             rowstr = '<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>' % (
                       header, valstr2, valstr1, valstr0)
         else:
-            valstr2 = "%.1f" % dataset[2][property]
-            valstr1 = "%.1f" % dataset[1][property]
-            valstr0 = "%.1f" % dataset[0][property]
+            valstr2 = dataset[2][property]
+            valstr1 = dataset[1][property]
+            valstr0 = dataset[0][property]
             color1 = self.printcolor(dataset[1][property], dataset[2][property], bib)
             color0 = self.printcolor(dataset[0][property], dataset[1][property], bib)
             rowstr = '<tr><td>%s</td><td>%s</td>' \
