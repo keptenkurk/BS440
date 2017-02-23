@@ -5,13 +5,13 @@
 # Appends data to local CSV file
 #
 #
-# Author: Specify the owner and contact details. Plugins will not be maintained by the
-# developer of BS440.py unless specified otherwise.
+# Author: DjZU
 #
 #
 #------------------------------------------------------------------------------------------
 import logging
 import csv
+import os
 from ConfigParser import SafeConfigParser
 
 class Plugin:
@@ -19,14 +19,19 @@ class Plugin:
     def __init__(self):
         return
 
-    def execute(globalconfig, persondata, weightdata, bodydata):
+    def execute(self, globalconfig, persondata, weightdata, bodydata):
         log = logging.getLogger(__name__)
-        config = SafeConfigParser()
-        config.read(__name__ + '.ini')
+        log.info('Starting plugin: ' + __name__)
+        plugindir = os.path.dirname(os.path.realpath(__file__)) + '/'
+        configfile = plugindir + __name__ + '.ini'
+        pluginconfig = SafeConfigParser()
+        pluginconfig.read(configfile)
+        log.info('ini read from: ' + configfile)
+        
         personsection = 'Person' + str(persondata[0]['person'])
-        if config.has_section(personsection):
-            personname = config.get(personsection, 'username')
-            csvFile = config.get(personsection, 'csvfile')
+        if pluginconfig.has_section(personsection):
+            personname = pluginconfig.get(personsection, 'username')
+            csvFile = pluginconfig.get(personsection, 'csvfile')
         else:
             log.error('Unable to write CSV: No details found in ini file '
                         'for person %d' % (persondata[0]['person']))
@@ -43,7 +48,7 @@ class Plugin:
 
         try:
             # read csv
-            with open(csvFile, 'rb') as csvfile:
+            with open(plugindir + csvFile, 'rb') as csvfile:
                 weightreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 csvlist = list(weightreader)
             csvfile.close()
@@ -53,7 +58,7 @@ class Plugin:
 
         try:
             # write to csv
-            with open(csvFile, 'ab') as csvfile:
+            with open(plugindir + csvFile, 'ab') as csvfile:
                 weightwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 for i, e in reversed(list(enumerate(weightdata))):
                     if any(str(weightdata[i]['timestamp']) in s for s in csvlist):
