@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 import pandas as pd
 import numpy as np
 import plotly.graph_objs as go
@@ -5,8 +8,13 @@ import plotly
 from plotly import tools
 import argparse
 from datetime import datetime, timedelta
-import webbrowser
+from ConfigParser import SafeConfigParser
+from scipy import stats
+
 __author__ = 'DjZU'
+__email__ = "djzu89@gmail.com"
+__version__ = "1.0.1"
+__status__ = "Production"
 
 
 # Get arguments
@@ -14,30 +22,199 @@ parser = argparse.ArgumentParser(description='Plot body data from smart scale.')
 parser.add_argument('-p','--person', help='Person',required=True)
 parser.add_argument('-w','--window',help='Time window in days.', required=True)
 args = parser.parse_args()
- 
+
 # Parameters
-person = args.person
-csvFile = person.lower() + '.csv'
-fileName= person.lower() + '-plot.html'
+personID = int(args.person)
 timeWindow = int(args.window)
 
+# BS440 config
+config = SafeConfigParser()
+config.read('BS440.ini')
+personsection = 'Person' + str(personID)
+if config.has_section(personsection):
+	person = config.get(personsection, 'username')
+	gender = config.get(personsection, 'gender')
+	goal = config.get(personsection, 'goal')
+else:
+	print('Unable to plot: No details found in ini file '
+                  'for person %d' % (int(personID)))
+
+# -----------------------
+# Functions
+def update_plotlyjs_for_offline():
+	import urllib2
+	cdn_url = 'https://cdn.plot.ly/plotly-latest.min.js'
+	response = urllib2.urlopen(cdn_url)
+	html = response.read()
+	f = open('./static/plotly.min.js', 'w')
+    	f.write(html)
+	f.close()
+	print 'Done updating ./static/plotly.min.js'
+
+# Uncomment to update ./static/plotly.min.js. Beware it could screw the display. 
+#update_plotlyjs_for_offline()
+
+def convert_to_datetime(timestamp):
+	if (timeWindow > 365):
+		return datetime.fromtimestamp(int(timestamp)).strftime('%A%n%b %-d %Y%n%-H:%M')
+	else:
+		return datetime.fromtimestamp(int(timestamp)).strftime('%A%n%b %-d%n%-H:%M')
+
+def prepare_weight_text(weight):
+    return str(weight) + " kg"
+def prepare_fat_text(fat):
+    return "Fat:\t\t" + str(fat) + " %\n"
+def prepare_muscle_text(muscle):
+    return "Muscle:\t" + str(muscle) + " %\n"
+def prepare_bone_text(bone):
+    return "Bone:\t" + str(bone) + " kg\n"
+def prepare_water_text(water):
+    return "Water:\t" + str(water) + " %\n"
+def prepare_bmi_text(bmi):
+    return "BMI:\t\t" + str(bmi) + "\n"
+def prepare_kcal_text(kcal):
+    return str(kcal) + " kcal            "
+
+def rotatePoint(centerPoint,point,angle,output):
+	"""Rotates a point around another centerPoint. Angle is in degrees.
+	Rotation is counter-clockwise"""
+	angle = 360 - angle 
+	""" Rotation is now clockwise """
+	angle = np.radians(angle)
+	temp_point = point[0]-centerPoint[0] , point[1]-centerPoint[1]
+	# 300/(260-20)=1.25
+	temp_point = ( temp_point[0]*np.cos(angle)-(temp_point[1]*np.sin(angle)) , ((temp_point[0]*np.sin(angle))+temp_point[1]*np.cos(angle))*1.25)
+	temp_point = temp_point[0]+centerPoint[0] , temp_point[1]+centerPoint[1]
+	rotatedPoint= str(temp_point[0]) + " " + str(temp_point[1])
+	if output=='dialPath':
+		return rotatedPoint
+	elif output=='x':
+		return str(temp_point[0])
+	elif output=='y':
+		return str(temp_point[1])
+
+
+def gaugeDiv(baseLabels, meterLabels, colors, value, suffix):
+	meterValues = []
+	meterValues.append(0)
+	meterSum = 0
+	# Calculate steps. Then first value is the sum of all the others.
+	for i in range(1, len(baseLabels)-1):
+		meterValues.append(float(baseLabels[i+1]) - float(baseLabels[i]))
+		meterSum += meterValues[i]
+
+	meterValues[0] = meterSum
+
+	# Dial path. Apply angle from full left position.
+	rangeValue = float(meterValues[0])
+	minValue=float(baseLabels[1])
+	chartCenter=0.5
+	dialTip=chartCenter-0.12
+	dialAngle=(value-minValue)*180/rangeValue
+	dialPath = 'M ' + rotatePoint((chartCenter,0.5),(chartCenter,0.485),dialAngle, 'dialPath') + ' L ' + rotatePoint((chartCenter,0.5),(dialTip,0.5),dialAngle, 'dialPath') + ' L ' + rotatePoint((chartCenter,0.5),(chartCenter,0.515),dialAngle, 'dialPath') + ' Z'
+	infoText=(str(value) + str(suffix))
+
+	# Gauge
+	meterChart = go.Pie(
+		values=meterValues, labels=meterLabels,
+		marker=dict(colors=colors, 
+			line=dict(width=0) # Switch line width to 0 in production
+			),
+		name="Gauge", hole=.3, direction="clockwise", rotation=90,
+		showlegend=False, textinfo="label", textposition="inside", hoverinfo="none",
+		sort=False
+			)
+
+	# Layout
+	layout = go.Layout(
+		xaxis=dict(showticklabels=False, autotick=False, showgrid=False, zeroline=False,),
+		yaxis=dict(showticklabels=False, autotick=False, showgrid=False, zeroline=False,),
+		shapes=[dict(
+				type='path', path=dialPath, fillcolor='rgba(44, 160, 101, 1)',
+				line=dict(width=0.5), xref='paper', yref='paper'),
+		],
+		annotations=[
+			dict(xref='paper', yref='paper', x=(chartCenter-0.015), y=0.2, text=infoText, font=dict(size='20', color='#ffffff'), showarrow=False),
+		],
+		height=260, width=300, margin=dict(l=0, r=0, t=20, b=0, autoexpand=False), plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)"
+			)
+
+	# Write static values as annotations
+	for value in baseLabels:
+		if value is not '-':
+			annotationDict=dict(
+					xref='paper', yref='paper', xanchor='center', yanchor='middle', 
+						x=rotatePoint((chartCenter,0.5),((chartCenter-0.45),0.5), ((float(value)-minValue)*180/rangeValue), 'x'), 
+						y=rotatePoint((chartCenter,0.5),((chartCenter-0.45),0.5), ((float(value)-minValue)*180/rangeValue), 'y'),
+						font=dict(size='12', color='#ffffff'), showarrow=False, text=value, 
+				)
+
+			layout['annotations'].append(annotationDict)
+
+	# Build HTML div
+	div = plotly.offline.plot(dict(data=[meterChart], layout=layout), include_plotlyjs=False, show_link=False, output_type='div')
+
+	return div
+
+def barDiv(slope, value, suffix, bar_suffix, bar_format, color, layoutRange):
+	infoText=(str(value) + str(suffix))
+	tendancy = (slope*timedelta(days=7).total_seconds()) # ToDO: round instead
+
+	if tendancy > 0:
+		tendancyText="+"
+		tendancyOrigin=0.825
+	else:
+		tendancyText=""
+		tendancyOrigin=0.675
+
+	
+	tendancyText+=str(bar_format % tendancy)+' '+bar_suffix
+	tendancyPosition=tendancyOrigin+((1.2*tendancy)/layoutRange[1]/4)
+
+	# Bar
+	barChart = go.Bar(
+		x=['tendancy',], y=[float(tendancy),],
+		name="Bar", showlegend=False, hoverinfo="none",	marker=dict(color=color),	
+			)
+
+	# Layout
+	layout = go.Layout(
+		xaxis=dict(showticklabels=False, autotick=False, showgrid=False, zeroline=True, fixedrange=True, domain=[0, 1], ),
+		yaxis=dict(showticklabels=False, autotick=False, showgrid=False, zeroline=False, fixedrange=True, domain=[0.5, 1], range=layoutRange, ),
+		annotations=[ 
+			dict(xref='paper', yref='paper', x=0.5, y=0, text=infoText, font=dict(size='20', color='#ffffff'), xanchor='center', yanchor='middle', showarrow=False),
+			dict(xref='paper', yref='paper', x=0.5, y=tendancyPosition, text=tendancyText, font=dict(size='14', color='#ffffff'), xanchor='center', yanchor='middle', showarrow=False),
+		],
+		height=260, width=120, margin=dict(l=0, r=0, t=40, b=40, autoexpand=False), plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)"
+			)
+
+	# Build HTML div
+	div = plotly.offline.plot(dict(data=[barChart], layout=layout), include_plotlyjs=False, show_link=False, output_type='div')
+
+	return div
+
+# -----------------------
 # Import data from csv
+# -----------------------
+csvFile = person.lower() + '.csv'
 df = pd.read_csv(csvFile, header=None, names=['timestamp','weight','fat','muscle','bone','water','kcal','bmi'])
 
-# Process data from csv
-def convert_to_datetime(timestamp):
-    return datetime.fromtimestamp(int(timestamp)).strftime('%A, %b %-d %Y %-H:%M')
-
-df['datetime'] = df['timestamp'].apply(convert_to_datetime)
+# Retrieve most timestamp
+last_timestamp=df['timestamp'].iat[-1]
 
 # Calcultate the timestamp equal to the last timestamp minus the given time window
-first_timestamp = (datetime.fromtimestamp(int(df['timestamp'].iat[-1])) - timedelta(days=timeWindow)).strftime('%s')
-#print first_timestamp
+min_timestamp = (datetime.fromtimestamp(int(last_timestamp)) - timedelta(days=timeWindow)).strftime('%s')
 
-df = df[(df.timestamp > int(first_timestamp))]
+# Tail the data frame
+df = df[(df.timestamp > int(min_timestamp))]
+
+# Retrieve oldest timestamp
+first_timestamp = df.loc[df.index[0], 'timestamp']
+
+# Create datetime from timestamp
+df['datetime'] = df['timestamp'].apply(convert_to_datetime)
 
 # Retrieve most recent values
-last_datetime=df['datetime'].iat[-1]
 last_weight=df['weight'].iat[-1]
 last_fat=df['fat'].iat[-1]
 last_muscle=df['muscle'].iat[-1]
@@ -45,66 +222,230 @@ last_bone=df['bone'].iat[-1]
 last_water=df['water'].iat[-1]
 last_kcal=df['kcal'].iat[-1]
 last_bmi=df['bmi'].iat[-1]
+last_datetime=df['datetime'].iat[-1]
 
-# Configure traces
-trace1 = go.Scatter(
-                    x=df['timestamp'], y=df['weight'], # Data
-                    text=df['datetime'], mode='markers+lines', name='weight', line=dict(shape='spline', smoothing='0.5') # Additional options
+# Prepare text from weight and suffix kg
+df['weightText'] = df['weight'].apply(prepare_weight_text)
+
+# Prepare hover data
+df['fatText'] = df['fat'].apply(prepare_fat_text)
+df['muscleText'] = df['muscle'].apply(prepare_muscle_text)
+df['boneText'] = df['bone'].apply(prepare_bone_text)
+df['waterText'] = df['water'].apply(prepare_water_text)
+df['kcalText'] = df['kcal'].apply(prepare_kcal_text)
+df['bmiText'] = df['bmi'].apply(prepare_bmi_text)
+df['dataText'] = df['fatText'] + df['muscleText'] + df['waterText'] + df['boneText'] + df['bmiText'] + df['kcalText']
+
+
+# -----------------------
+# Configure main plot
+# -----------------------
+
+# Weight tendancy
+weightSlope, weightIntercept, weight_r_value, weight_p_value, weight_std_err = stats.linregress(df['timestamp'],df['weight'])
+weightTendancyLine = weightSlope*df['timestamp']+weightIntercept
+
+if (float(goal) > last_weight) and (weightSlope > 0):
+	weightBarColor=['rgb(51,255,102)',]
+elif (float(goal) < last_weight) and (weightSlope < 0):
+	weightBarColor=['rgb(51,255,102)',]
+else:
+	weightBarColor=['rgb(255,102,0)',]
+
+
+weightDiv = barDiv(weightSlope*1000, last_weight, 'kg<br>Weight', '<br>g/week', '%.0f', weightBarColor, [-2000,2000])
+
+tendancyTrace = go.Scatter(
+	x=df['timestamp'], y=weightTendancyLine, # Data
+	mode='lines', name='Tendancy', hoverinfo='none', visible=False # Additional options
                    )
-trace2 = go.Scatter(x=df['timestamp'], y=df['fat'], text=df['datetime'], mode='markers+lines', name='fat', line=dict(shape='spline', smoothing='0.5') )
-trace3 = go.Scatter(x=df['timestamp'], y=df['muscle'], text=df['datetime'], mode='markers+lines', name='muscle', line=dict(shape='spline', smoothing='0.5') )
-trace4 = go.Scatter(x=df['timestamp'], y=df['bone'], text=df['datetime'], mode='markers+lines', name='bone', line=dict(shape='spline', smoothing='0.5') )
-trace5 = go.Scatter(x=df['timestamp'], y=df['water'], text=df['datetime'], mode='markers+lines', name='water', line=dict(shape='spline', smoothing='0.5') )
-trace6 = go.Scatter(x=df['timestamp'], y=df['kcal'], text=df['datetime'], mode='markers+lines', name='kcal', line=dict(shape='spline', smoothing='0.5') )
-trace7 = go.Scatter(x=df['timestamp'], y=df['bmi'], text=df['datetime'], mode='markers+lines', name='bmi', line=dict(shape='spline', smoothing='0.5') )
 
-# Configure subplots
-fig = tools.make_subplots(rows=7, cols=1, subplot_titles=('Weight', 'Fat %', 'Muscle %', 'Water %', 'kCal needs', 'BMI', 'Bone mass'), vertical_spacing='0.02')
-fig.append_trace(trace1, 1, 1)
-fig.append_trace(trace2, 2, 1)
-fig.append_trace(trace3, 3, 1)
-fig.append_trace(trace5, 4, 1)
-fig.append_trace(trace6, 5, 1)
-fig.append_trace(trace7, 6, 1)
-fig.append_trace(trace4, 7, 1)
+# Traces
+weightTrace = go.Scatter(
+	x=df['timestamp'], y=df['weight'], # Data
+	mode='markers+lines+text', text=df['weightText'], textposition='top center', textfont=dict(size='16', color='#1f77b4'), name='weight',
+	line=dict(shape='spline', smoothing='0.5'), hoverinfo='none', # Additional options
+                   )
+dataTrace = go.Scatter(
+	x=df['timestamp'], y=df['weight'], # Data
+	mode='markers', name='', text=df['dataText'], hoverinfo='text', # Additional options
+                   )
+goalTrace = go.Scatter(
+	x=[first_timestamp, last_timestamp], y=[goal, goal], # Data
+	mode='lines', name='goal', line=dict(shape='spline', smoothing='0.5'), hoverinfo='none', # Additional options
+                   )
 
-fig['layout'].update(height=3000, title=person+' body data', showlegend=False)
-fig['layout']['xaxis'].update(showticklabels=False)
-fig['layout']['xaxis2'].update(showticklabels=False)
-fig['layout']['xaxis3'].update(showticklabels=False)
-fig['layout']['xaxis4'].update(showticklabels=False)
-fig['layout']['xaxis5'].update(showticklabels=False)
-fig['layout']['xaxis6'].update(showticklabels=False)
-fig['layout']['xaxis7'].update(showticklabels=False)
+traceData=[weightTrace, dataTrace, goalTrace, tendancyTrace]
 
-# Plot data 
-plot_div = plotly.offline.plot(fig, output_type='div')
+# If tick labels (date and time on x axis) are too long, increase bottom margin and height to give room
+layoutBottomRoom=0
+layoutHeight=450+layoutBottomRoom
+layoutBottomMargin=80+layoutBottomRoom
 
+weightLayout = go.Layout(
+	title = person + ' Body Weight (kg)', titlefont=dict(size='20', color='#ffffff'),
+	showlegend=False, height=layoutHeight, margin=dict(l=40, r=40, t=60, b=layoutBottomMargin),
+	xaxis=dict(showticklabels=True, tickvals=df['timestamp'], ticktext=df['datetime'], tickfont=dict(size='14', color='#ffffff'), ),
+	yaxis=dict(mirror='ticks', tickfont=dict(size='14', color='#ffffff')), paper_bgcolor="rgba(0,0,0,0)"
+              )
+
+weightFig = dict(data=traceData, layout=weightLayout)
+
+# Plot weight trace 
+plotDiv = plotly.offline.plot(weightFig, include_plotlyjs=False, show_link=False, output_type='div')
+
+
+# -----------------------
+# Configure gauges
+# -----------------------
+
+# BMI gauge
+bmiDiv = gaugeDiv(["-", "14", "18.5", "25", "30", "40"], 
+	[" ", "Underweight", "Normal", "Overweight", "Obese"], 
+	['rgba(0,0,0,0)','rgb(232,226,202)','rgb(51,255,102)','rgb(255,255,51)','rgb(255,102,0)'], 
+	last_bmi, '<br>BMI')
+
+# Fat gauge
+if gender == 'male':
+	fatBaseLabels = ["-", "2", "6", "13", "17", "22", "30", "40"]	
+
+elif gender == 'female':
+	fatBaseLabels = ["-", "10", "14", "21", "25", "31", "40", "50"]
+
+fatDiv = gaugeDiv(fatBaseLabels, 
+	[" ", "Essential fat", "Athlete", "Fitness", "Average", "Overweight", "Obese"], 
+	['rgba(0,0,0,0)','rgb(232,226,202)','rgb(102,255,153)','rgb(51,255,102)','rgb(255,255,51)','rgb(255,153,51)','rgb(255,102,0)'], 
+	last_fat, '%<br>Fat')
+
+# Water gauge
+if gender == 'male':
+	if last_fat >= 4 and last_fat < 15:
+		waterBaseLabels = ["-", "30", "63", "70", "80"]
+	if last_fat >= 15 and last_fat < 22:
+		waterBaseLabels = ["-", "30", "57", "63", "80"]
+	if last_fat >= 22 and last_fat < 25:
+		waterBaseLabels = ["-", "30", "55", "57", "80"]
+	if last_fat >= 25:
+		waterBaseLabels = ["-", "30", "37", "55", "80"]
+
+elif gender == 'female':
+	if last_fat >= 4 and last_fat < 21:
+		waterBaseLabels = ["-", "30", "58", "70", "80"]
+	if last_fat >= 21 and last_fat < 30:
+		waterBaseLabels = ["-", "30", "52", "58", "80"]
+	if last_fat >= 30 and last_fat < 33:
+		waterBaseLabels = ["-", "30", "49", "52", "80"]
+	if last_fat >= 33:
+		waterBaseLabels = ["-", "30", "37", "49", "80"]
+
+waterDiv = gaugeDiv(waterBaseLabels, 
+	[" ", "Low", "Optimal", "High"], 
+	['rgba(0,0,0,0)','rgb(255,255,51)','rgb(51,255,102)','rgb(255,255,51)'], 
+	last_water, '%<br>Water')
+
+# Weight (see above)
+
+# Fatle tendancy
+fatSlope, fatIntercept, fat_r_value, fat_value, fat_std_err = stats.linregress(df['timestamp'],df['fat'])
+fatTendancyLine = fatSlope*df['timestamp']+fatIntercept
+
+if fatSlope < 0:
+	fatBarColor=['rgb(51,255,102)',]
+else:
+	fatBarColor=['rgb(255,102,0)',]
+
+fatBarDiv = barDiv(fatSlope, last_fat, '%<br>Fat', '<br>%/week', '%.2f', fatBarColor, [-0.6,0.6])
+
+
+# Muscle tendancy
+muscleSlope, muscleIntercept, muscle_r_value, muscle_value, muscle_std_err = stats.linregress(df['timestamp'],df['muscle'])
+muscleTendancyLine = muscleSlope*df['timestamp']+muscleIntercept
+
+if muscleSlope > 0:
+	muscleBarColor=['rgb(51,255,102)',]
+else:
+	muscleBarColor=['rgb(255,102,0)',]
+
+muscleDiv = barDiv(muscleSlope, last_muscle, '%<br>Muscle', '<br>%/week', '%.2f', muscleBarColor, [-0.6,0.6])
+
+# kCal tendancy
+kcalSlope, kcalIntercept, kcal_r_value, kcal_value, kcal_std_err = stats.linregress(df['timestamp'],df['kcal'])
+kcalTendancyLine = kcalSlope*df['timestamp']+kcalIntercept
+
+kcalDiv = barDiv(kcalSlope, last_kcal, 'kcal<br>Needs', '<br>kcal/week', '%.0f', weightBarColor, [-100,100])
+
+# Bone tendancy
+boneSlope, boneIntercept, bone_r_value, bone_value, bone_std_err = stats.linregress(df['timestamp'],df['bone'])
+boneTendancyLine = boneSlope*df['timestamp']+boneIntercept
+
+if boneSlope > 0:
+	boneBarColor=['rgb(51,255,102)',]
+else:
+	boneBarColor=['rgb(255,102,0)',]
+
+boneDiv = barDiv(boneSlope*1000, last_bone, 'kg<br>Bone', '<br>g/week', '%.0f', boneBarColor, [-100,100])
+
+
+# -----------------------
 # Build HTML
+# -----------------------
+
+# Generate template to be used by Flask
+fileName= 'templates/' + person.lower() + '-plot-' + str(timeWindow) + '.html'
 f = open(fileName,'w')
 
-message = """<html>
-<head>
-	<title>""" + person + """ body data</title>
-</head>
-<body>
-<p align="center" style="font-family:'Open Sans',verdana, arial, sans-serif; font-size:48px;">Last Measurements</p>
-<p align="left" style="font-family:'Open Sans', verdana, arial, sans-serif; font-size:16px;">"""
-
-message += "Date: " + str(last_datetime) + "<br/>"
-message += "Weight: " + str(last_weight) + "<br/>"
-message += "Fat %: " + str(last_fat) + "<br/>"
-message += "Muscle %: " + str(last_muscle) + "<br/>"
-message += "Water %: " + str(last_water) + "<br/>"
-message += "kCal needs: " + str(last_kcal) + "<br/>"
-message += "BMI: " + str(last_bmi) + "<br/>"
-message += "Bone mass: " + str(last_bone) + "<br/></p><p>"
-
-message += plot_div + """
-</p></body>
-</html>"""
+message = """
+	<div id="trace">
+	"""
+message += plotDiv
+message += """
+	</div><br/>"""
+message += """
+	<div id="gaugesandbars">
+		<div id="gauges">
+			<div class="gauge">
+			"""
+message += bmiDiv + """
+			</div>"""
+message += """
+			<div class="gauge">
+			"""
+message += fatDiv + """
+			</div>"""
+message += """
+			<div class="gauge">
+			"""
+message += waterDiv + """
+			</div>"""
+message += """
+		</div>
+		<div id="bars">
+			<div class="bar">
+			"""
+message += weightDiv + """
+			</div>"""
+message += """
+			<div class="bar">
+			"""
+message += fatBarDiv + """
+			</div>"""
+message += """
+			<div class="bar">
+			"""
+message += muscleDiv + """
+			</div>"""
+message += """
+			<div class="bar">
+			"""
+message += kcalDiv + """
+			</div>"""
+message += """
+			<div class="bar">
+		"""
+message += boneDiv + """
+			</div>
+		</div>
+	</div>"""
 
 f.write(message)
 f.close()
-
-webbrowser.open_new_tab(fileName)
