@@ -1,0 +1,11 @@
+{% extends "squeleton.html" %}
+
+{% block title %}{{ person }} body data{% endblock %}
+
+{% block head %}
+	<script src="{{ url_for('static', filename='plotly.min.js') }}"></script>
+{% endblock %}
+
+{% block body %}
+	{% include plotFile %}
+{% endblock %}

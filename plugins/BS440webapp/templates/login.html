@@ -1,0 +1,16 @@
+{% extends "squeleton.html" %}
+
+{% block title %}Smart scale{% endblock %}
+
+{% block body %}
+<div id="login">
+	<h1>Persons</h1>
+	<nav>
+		<ul>
+		{% for i, person in list(enumerate(persons)) %}
+			<li><a href="{{ i+1 }}" >{{ person }}</a></li>
+		{% endfor %}
+		</ul>
+	</nav>
+</div>
+{% endblock %}
