@@ -13,8 +13,8 @@
 # Dependencies:
 * pandas
 		sudo apt-get install python-pandas
-* math plotly scipy
-		sudo -H pip install math plotly scipy
+* plotly
+		sudo -H pip install plotly
 * flask
 		sudo -H pip install flask
 
