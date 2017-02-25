@@ -14,12 +14,13 @@
 * pandas
 		sudo apt-get install python-pandas
 * plotly
-		sudo -H pip install plotly
+		sudo -H pip install --upgrade plotly
 * flask
 		sudo -H pip install flask
 
 # Tested on
-* Intel NUC5i3RYB operating x86_64 GNU/Linux Ubuntu 16.04.4 with 4.4.0-57-lowlatency kernel
+* Intel NUC5i3RYB operating x86_64 Ubuntu 16.04.2 LTS
+* Raspberry Pi 3 Model B operating armv7l Raspbian GNU/Linux 8 (jessie)
 
 # Preferences
 Before using this app, personalize your settings in the file _BS440webapp.ini_.
