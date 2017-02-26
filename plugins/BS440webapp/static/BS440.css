@@ -1,0 +1,106 @@
+html { 
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: #202020 url(background.jpg) repeat;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	color: #FFF;
+	margin: 0;
+	padding: 0;
+}
+
+div#trace {
+
+}
+
+.alignleft {
+	float: left;
+}
+.alignright {
+	float: right;
+}
+
+div#gaugesandbars {
+	text-align:center;
+	margin-left: auto; margin-right: auto;
+}
+
+div#gauges {
+	display: inline-block;
+	margin: 0 20px 0 0;
+}
+
+div#bars {
+	display: inline-block;
+	margin: 0 0 0 20px;
+}
+
+div.gauge {
+	display: inline-block; 
+	margin: 0 0 0 0;
+}
+
+div.bar {
+	display: inline-block; 
+	margin: 0 0 0 0;
+}
+
+/* Login page */
+nav ul {
+	list-style: none; overflow: hidden; position: relative;
+}
+	nav ul li {
+		float: left; margin: 0 20px 0 0;
+	}
+		nav ul li a {
+			display: block; width: 404px; height: 404px;
+			background-image: url(0.png); background-repeat: no-repeat;
+			text-decoration: none; text-align: center;  color: white;
+			font-size: 26pt;
+		}
+			nav ul li:nth-child(1) a {
+				background-image: url(1.png);
+				background-color: #5bb2fc;
+				background-position: 0 44px;
+			}
+			nav ul li:nth-child(2) a {
+				background-image: url(2.png);
+				background-color: #58ebd3;
+				background-position: 0 44px;
+			}
+			nav ul li:nth-child(3) a {
+				background-image: url(3.png);
+				background-color: #ffa659;
+				background-position: 0 44px;
+			}
+			nav ul li:nth-child(4) a {
+				background-image: url(4.png);
+				background-color: #ff7a85;
+				background-position: 0 44px;
+			}
+		
+				nav ul li a span {
+					font: 50px "Dosis", sans-serif; text-transform: uppercase; 
+					position: absolute; left: 580px; top: 29px;
+					display: none;
+				}
+					nav ul li a:hover span {
+						display: block;
+					}
+				
+				nav ul li:nth-child(1) a span {
+					color: #5bb2fc;
+				}
+				nav ul li:nth-child(2) a span {
+					color: #58ebd3;
+				}
+				nav ul li:nth-child(3) a span {
+					color: #ffa659;
+				}
+				nav ul li:nth-child(4) a span {
+					color: #ff7a85;
+				}
+					
