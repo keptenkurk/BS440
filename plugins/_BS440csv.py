@@ -11,6 +11,8 @@ __version__ = "1.0.1"
 __status__ = "Production"
 #
 # ------------------------------------------------------------------------------
+import logging
+import os
 import csv
 
 
@@ -19,10 +21,12 @@ class Plugin:
     def __init__(self):
         return
 
-    def execute(globalconfig, persondata, weightdata, bodydata):
+    def execute(self, globalconfig, persondata, weightdata, bodydata):
         log = logging.getLogger(__name__)
-        personID = persondata[0]['person']
-        csvFile = './BS440csv/' + str(personID) + '.csv'
+        log.info('Starting plugin: ' + __name__)
+        personID = int(persondata[0]['person'])
+        csvFile = os.path.dirname(os.path.realpath(__file__)) + \
+                            '/BS440csv/' + str(personID) + '.csv'
 
         # calculate BMI data list
         calculateddata = []
@@ -33,6 +37,7 @@ class Plugin:
             bmiDict['bmi'] = round(weightdata[i]['weight'] / (size * size), 1)
             calculateddata.append(bmiDict)
 
+        csvlist = []
         if os.path.isfile(csvFile):
             try:
                 # read CSV
@@ -51,18 +56,20 @@ class Plugin:
                 weightwriter = csv.writer(csvfile, delimiter=',',
                                           quotechar='"',
                                           quoting=csv.QUOTE_MINIMAL)
-            for i, e in reversed(list(enumerate(weightdata))):
-                if any(str(weightdata[i]['timestamp']) in s for s in csvlist):
-                    pass
-                else:
-                    weightwriter.writerow([str(weightdata[i]['timestamp']),
-                                           str(weightdata[i]['weight']),
-                                           str(bodydata[i]['fat']),
-                                           str(bodydata[i]['muscle']),
-                                           str(bodydata[i]['bone']),
-                                           str(bodydata[i]['tbw']),
-                                           str(bodydata[i]['kcal']),
-                                           str(calculateddata[i]['bmi'])])
+                for i, e in reversed(list(enumerate(weightdata))):
+                    if any(str(weightdata[i]['timestamp']) in s for s in csvlist):
+                        pass
+                    else:
+                        weightwriter.writerow([str(weightdata[i]['timestamp']),
+                                               str(weightdata[i]['weight']),
+                                               str(bodydata[i]['fat']),
+                                               str(bodydata[i]['muscle']),
+                                               str(bodydata[i]['bone']),
+                                               str(bodydata[i]['tbw']),
+                                               str(bodydata[i]['kcal']),
+                                               str(calculateddata[i]['bmi'])])
             log.info('CSV successfully updated for person %d' % personID)
         except:
             log.error('Failed to write CSV for person %d' % personID)
+
+        log.info('Finished plugin: ' + __name__)
