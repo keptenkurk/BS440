@@ -51,9 +51,10 @@ def wait_for_device(devname):
     found = False
     while not found:
         try:
-            found = adapter.filtered_scan(devname)
             # wait for scale to wake up and connect to it
+            found = adapter.filtered_scan(devname)
         except pygatt.exceptions.BLEError:
+            # reset adapter when (see issue #33)
             adapter.reset()
     return
 
@@ -64,9 +65,7 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-# use pygatt.BLEAddressType.random from version 3.0.0 of pygatt
-#            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
-            device = adapter.connect(address, 5, 'random')
+            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1
