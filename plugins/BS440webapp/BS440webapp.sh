@@ -1,6 +1,7 @@
 #!/bin/bash
 # DjZU
 # Run BS440webapp.py
+#
 # Put the following line (remove the # and replace path/to) in your /etc/rc.local to run the Flask web app at boot time
 #/path/to/BS440/plugins/BS440webapp/BS440webapp.sh >/dev/null 2>&1 &
 
