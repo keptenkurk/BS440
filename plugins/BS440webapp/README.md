@@ -29,8 +29,8 @@ Before using this app, personalize your settings in the file _BS440webapp.ini_.
 * Make the web app run in background at boot
 	Open /etc/rc.local
 		sudo nano /etc/rc.local
-	Add the following line before 'exit 0' (replace /path/to/BS440)
-		/path/to/BS440/plugins/BS440webapp/BS440webapp.sh >/dev/null 2>&1 &
+	Add the following line before 'exit 0' (replace <user> and /path/to/BS440)
+		su -l <user> -c "/path/to/BS440/plugins/BS440webapp/BS440webapp.sh >/dev/null 2>&1 &"
 
 	Mark scripts as executables
 		sudo chmod 764 /path/to/BS440/plugins/BS440webapp/BS440flask.py
