@@ -215,7 +215,7 @@ logging.basicConfig(level=numeric_level,
                     format='%(asctime)s %(levelname)-8s %(funcName)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
                     filename='BS440plot.log',
-                    filemode='w')
+                    filemode='a')
 log = logging.getLogger(__name__)
 
 # Grab person details
@@ -225,7 +225,7 @@ if config.has_section(personsection):
 	goal = config.get(personsection, 'goal')
 else:
 	log.error('Unable to plot: No details found in ini file for person %d. Exiting.' % personID)
-	sys.exit(0)
+	sys.exit(127)
 
 #-----------------------------------------------------------------------------------------
 # Import data from csv
@@ -417,69 +417,69 @@ boneDiv = barDiv(boneSlope*1000, last_bone, 'kg<br>Bone', '<br>g/week', '%.0f', 
 #-----------------------------------------------------------------------------------------
 
 # Prepare HTML
-message = """
+plotlyHTML = """
 	<div id="trace">
 	"""
-message += plotDiv
-message += """
+plotlyHTML += plotDiv
+plotlyHTML += """
 	</div><br/>"""
-message += """
+plotlyHTML += """
 	<div id="gaugesandbars">
 		<div id="gauges">
 			<div class="gauge">
 			"""
-message += bmiDiv + """
+plotlyHTML += bmiDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 			<div class="gauge">
 			"""
-message += fatDiv + """
+plotlyHTML += fatDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 			<div class="gauge">
 			"""
-message += waterDiv + """
+plotlyHTML += waterDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 		</div>
 		<div id="bars">
 			<div class="bar">
 			"""
-message += weightDiv + """
+plotlyHTML += weightDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 			<div class="bar">
 			"""
-message += fatBarDiv + """
+plotlyHTML += fatBarDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 			<div class="bar">
 			"""
-message += muscleDiv + """
+plotlyHTML += muscleDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 			<div class="bar">
 			"""
-message += kcalDiv + """
+plotlyHTML += kcalDiv + """
 			</div>"""
-message += """
+plotlyHTML += """
 			<div class="bar">
 		"""
-message += boneDiv + """
+plotlyHTML += boneDiv + """
 			</div>
 		</div>
 	</div>"""
 
 # Generate template to be used by Flask
-fileName= 'templates/' + person.lower() + '-plot-' + str(timeWindow) + '.html'
+fileName= './templates/plot-' + str(personID) + '-' + str(timeWindow) + '.html'
 
-with open(fileName,'w') as f:
-	f.write(message)
+try:
+	f = open(fileName,'w')
+	f.write(plotlyHTML)
 	f.close()
-	log.info('Plot file %s generated successfully for user %s. Exiting.' % (fileName, person) )
-	sys.exit(0)
+	log.info('Plot file %s generated successfully for user %s.' % (fileName, person) )
 
-# This should not be executed if no error
-log.error('Fail to generate plot file %s for user %s.' % (fileName, person) )
-sys.exit(127)
+except:
+	log.error('Failed to generate plot file %s for user %s.' % (fileName, person) )
+	sys.exit(126)
 
