@@ -28,6 +28,7 @@ import os
 import sys
 
 # BS440webapp config
+dirname = os.path.dirname(__file__)
 config = SafeConfigParser()
 config.read('BS440webapp.ini')
 host = config.get('Flask', 'host')
@@ -40,20 +41,10 @@ for section_name in config.sections():
 		personsdata.append(persons)
 
 # Set up Logging
-numeric_level = getattr(logging,
-                        config.get('Program', 'loglevel').upper(),
-                        None)
-if not isinstance(numeric_level, int):
-    raise ValueError('Invalid log level: %s' % loglevel)
-logging.basicConfig(level=numeric_level,
-                    format='%(asctime)s %(levelname)-8s %(funcName)s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename='BS440flask.log',
-                    filemode='w')
-log = logging.getLogger(__name__)
+
 
 if personsdata == []:
-	log.error('No users are defined in the initialisation file. Exiting.')
+
 	sys.exit(127)
 
 #------------------------------------------------------------------------------------------
@@ -88,11 +79,10 @@ def person(personID, days):
 	if config.has_section(personsection):
 		person = config.get(personsection, 'username')
 	else:
-		log.error('Unable to plot: No details found in ini file for person %d' % personID)
-		return
 
-	dirname = os.path.dirname(__file__)
-	plotTemplate = person.lower() + '-plot-' + str(days) + '.html'
+		return redirect('/')
+
+	plotTemplate = 'plot-' + str(personID) + '-' + str(days) + '.html'
 	plotFile = './templates/' + plotTemplate
 	plotPath = os.path.join(dirname, plotFile)
 	csvFile = '../BS440csv/' + str(personID) + '.csv'
@@ -103,17 +93,19 @@ def person(personID, days):
 		if os.path.isfile(plotPath):
 			if (os.path.getmtime(csvPath) > os.path.getmtime(plotPath) ):
 				updatePlot()
+
 		else:
 			updatePlot()
+
 	else:
-		log.error('Unable to plot: CSV file is missing for person %d. Please first enable CSV plugin and step on the scale to get readings.' % personID)
-		return
+
+		return redirect('/')
 
 	return render_template('person.html', person=person, days=days, plotFile=plotTemplate)
 
 
 if __name__ == '__main__':
 
-	app.run(host=host, port=port, debug=False)
-	log.info('Flask webserver started.')
+	app.run(host=host, port=port, debug=True)
+
 
