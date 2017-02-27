@@ -12,6 +12,10 @@ https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-blueto
 # Tested on
 * Raspberry Pi B+ (Linux raspberrypi 4.1.13+ #826 
   PREEMPT Fri Nov 13 20:13:22 GMT 2015 armv6l GNU/Linux).
+  
+# Tested scales
+* Medisana BS440
+* Medisana BS444
 
 # Description
 BS440 listens for information from a BS440 or compatible bluetooth scale. 
@@ -23,6 +27,7 @@ file _BS440.ini_, to the following possibilities:
 * Update weight and fat parameters in Google fit (http://fit.google.com)
   For creating an account and authentication file please see the Wiki for this
   repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
+* Update weight, water, fat and muscel parameters in Runalyze (https://github.com/Runalyze/Runalyze)
 
 # Preferences
 Before using this app, personalize your settings in the file _BS440.ini_.
@@ -44,6 +49,17 @@ the ids to use (if necessary). Note that the weight sensors are identified by _I
 while the other sensors are identified by _idx_ in _BS440domoticz.ini_.
 
 ![domoticz](https://raw.githubusercontent.com/Tristan79/BS440/master/BS440domoticz.png)
+
+# Runalyze
+Uncomment the following lines in the _BS440.ini_ and fill in your MySQL-Settings as you used for your Runalyze installation:
+
+```
+#[RunalyzeLocal]
+#host: localhost
+#user: root
+#passwd: enter_your_password_here
+#db: runalyze
+```
 
 # Disclaimer
 This software is build out of personal interest and not related to 
