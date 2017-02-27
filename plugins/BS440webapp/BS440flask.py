@@ -40,11 +40,8 @@ for section_name in config.sections():
 		persons.append(config.get(section_name, 'username'))
 		personsdata.append(persons)
 
-# Set up Logging
-
 
 if personsdata == []:
-
 	sys.exit(127)
 
 #------------------------------------------------------------------------------------------

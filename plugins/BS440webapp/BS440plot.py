@@ -8,6 +8,7 @@
 # Requirements:
 # BS440 plugin BS440csv.py
 #
+#
 # Dependencies (install with 'sudo -H pip install packagename'):
 # pandas math plotly scipy
 #
