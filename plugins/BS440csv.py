@@ -12,45 +12,64 @@ __status__ = "Production"
 #
 #------------------------------------------------------------------------------------------
 import csv
+import logging
+import os
 
 class Plugin:
 
-    def __init__(self):
-	return
+	def __init__(self):
+		return
 
-    def execute(globalconfig, persondata, weightdata, bodydata):
-	log = logging.getLogger(__name__)
-	personID = persondata[0]['person']
-	csvFile = './BS440csv/' + str(personID) + '.csv'
+	def execute(self, globalconfig, persondata, weightdata, bodydata):
+		dirname = os.path.dirname(__file__)
+		log = logging.getLogger(__name__)
+		personID = str(persondata[0]['person'])
+		csvFile = './BS440csv/' + personID + '.csv'
+		csvPath = os.path.join(dirname, csvFile)
+		csvDir = os.path.dirname(csvPath)
 
-	# calculate BMI data list
-	calculateddata = []
-	datetimedata = []
-	size = persondata[0]['size'] / 100.00
-	for i, e in list(enumerate(weightdata)):
-	    bmiDict = {}
-	    bmiDict['bmi'] = round(weightdata[i]['weight'] / (size * size), 1)
-	    calculateddata.append(bmiDict)
+		# calculate BMI data list
+		calculateddata = []
+		datetimedata = []
+		size = persondata[0]['size'] / 100.00
+		for i, e in list(enumerate(weightdata)):
+			bmiDict = {}
+			bmiDict['bmi'] = round(weightdata[i]['weight'] / (size * size), 1)
+			calculateddata.append(bmiDict)
 
-	if os.path.isfile(csvFile):
+		if os.path.isfile(csvPath):
+			try:
+				# read CSV
+				with open(csvPath, 'rb') as csvfile:
+					weightreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+					csvlist = list(weightreader)
+
+			except:
+				log.error('Failed to read CSV for person %s' % personID)
+
+		else:
+			# Create BS440csv directory if necessary
+			if not os.path.exists(csvDir):
+				log.info('Creating BS440csv directory')
+				os.makedirs(csvDir)
+
+			# Create file before appending for first time
+			log.info('Creating %s' % csvFile )
+			open(csvPath, 'ab').close()
+			csvlist = []
+
 		try:
-		    # read CSV
-		    with open(csvFile, 'rb') as csvfile:
-			weightreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-			csvlist = list(weightreader)
+			# update CSV
+			with open(csvPath, 'ab') as csvfile:
+				weightwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+				for i, e in reversed(list(enumerate(weightdata))):
+					if any(str(weightdata[i]['timestamp']) in s for s in csvlist):
+						pass
+					else:
+						weightwriter.writerow([str(weightdata[i]['timestamp']), str(weightdata[i]['weight']), str(bodydata[i]['fat']), str(bodydata[i]['muscle']), str(bodydata[i]['bone']), str(bodydata[i]['tbw']), str(bodydata[i]['kcal']), str(calculateddata[i]['bmi'])])
+
+				log.info('CSV successfully updated for person %s' % personID)
 
 		except:
-		    log.error('Failed to read CSV for person %d' % personID)
+			log.error('Failed to write CSV for person %s' % personID)
 
-	try:
-	    # update CSV
-	    with open(csvFile, 'ab') as csvfile:
-		weightwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-		for i, e in reversed(list(enumerate(weightdata))):
-		    if any(str(weightdata[i]['timestamp']) in s for s in csvlist):
-			pass
-		    else:
-			weightwriter.writerow([str(weightdata[i]['timestamp']), str(weightdata[i]['weight']), str(bodydata[i]['fat']), str(bodydata[i]['muscle']), str(bodydata[i]['bone']), str(bodydata[i]['tbw']), str(bodydata[i]['kcal']), str(calculateddata[i]['bmi'])])
-		log.info('CSV successfully updated for person %d' % personID)
-	except:
-	    log.error('Failed to write CSV for person %d' % personID)
