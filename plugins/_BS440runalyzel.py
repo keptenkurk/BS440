@@ -47,16 +47,19 @@ class Plugin:
         try:
             db = MySQLdb.connect(sql_host, sql_user, sql_passwd, sql_db)
             cur = db.cursor()
-            sql_cmd = ("INSERT INTO runalyze_user (time, weight, fat, water, muscles, accountid) VALUES"
-                       "('%s', '%s', '%s', '%s', '%s', '%s')" % (
-                        weightdata[0]['timestamp'],
-                        weightdata[0]['weight'],
-                        bodydata[0]['fat'],
-                        bodydata[0]['tbw'],
-                        bodydata[0]['muscle'],
-                        runalyzeID))
-            log.info(sql_cmd)
-            a = cur.execute(sql_cmd)
+            for i, e in reversed(list(enumerate(weightdata))):
+                sql_cmd = ("INSERT INTO runalyze_user (time, weight, fat, water, muscles, accountid) SELECT "
+                           "'%s', '%s', '%s', '%s', '%s', '%s' FROM dual "
+                           "WHERE NOT EXISTS (SELECT * FROM runalyze_user WHERE time='%s')" % (
+                            weightdata[i]['timestamp'],
+                            weightdata[i]['weight'],
+                            bodydata[i]['fat'],
+                            bodydata[i]['tbw'],
+                            bodydata[i]['muscle'],
+                            runalyzeID,
+                            weightdata[i]['timestamp']))
+                log.info(sql_cmd)
+                a = cur.execute(sql_cmd)
             cur.close()
             db.commit()
             db.close()
