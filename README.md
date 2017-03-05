@@ -4,6 +4,8 @@ User managementboy reports succes with the Medisana BS444 too.
 
 # Blog info
 https://keptenkurk.wordpress.com/2016/02/07/connecting-the-medisana-bs440-bluetooth-scale/
+with a full step-by-step installation instruction on
+https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-bluetooth-scale-epilogue/
 
 # Prequisits
 * Installed Pygatt 3.0.0 release
