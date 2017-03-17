@@ -72,7 +72,7 @@ class Plugin:
         return 'None'
 
 
-    def self.exists_id(self, sensorid):
+    def exists_id(self, sensorid):
         global query
         global data
         if query:
