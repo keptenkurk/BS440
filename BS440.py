@@ -169,7 +169,11 @@ while True:
             if continue_comms:
                 log.info('Waiting for notifications for another 30 seconds')
                 time.sleep(30)
-                device.disconnect()
+                try:
+                    device.disconnect()
+                except pygatt.exceptions.NotConnectedError:
+                    log.info('Could not diconnect...')
+
                 log.info('Done receiving data from scale')
                 # process data if all received well
                 if persondata and weightdata and bodydata:
