@@ -172,7 +172,7 @@ while True:
                 try:
                     device.disconnect()
                 except pygatt.exceptions.NotConnectedError:
-                    log.info('Could not diconnect...')
+                    log.info('Could not disconnect...')
 
                 log.info('Done receiving data from scale')
                 # process data if all received well
