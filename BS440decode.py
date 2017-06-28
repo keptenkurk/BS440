@@ -25,7 +25,7 @@ def decodePerson(handle, values):
     '''
     data = unpack('BxBxBBBxB', bytes(values[0:9]))
     retDict = {}
-    retDict["valid"] = (handle == 0x25 and data[0] == 0x84)
+    retDict["valid"] = (handle == Handle_person and data[0] == 0x84)
     retDict["person"] = data[1]
     if data[2] == 1:
         retDict["gender"] = "male"
@@ -55,7 +55,7 @@ def decodeWeight(handle, values):
         '''
     data = unpack('<BHxxIxxxxB', bytes(values[0:14]))
     retDict = {}
-    retDict["valid"] = (handle == 0x1b and data[0] == 0x1d)
+    retDict["valid"] = (handle == Handle_weight and data[0] == 0x1d)
     retDict["weight"] = data[1]/100.0
     if data[2] < sys.maxint:
         retDict["timestamp"] = data[2]
@@ -83,7 +83,7 @@ def decodeBody(handle, values):
     '''
     data = unpack('<BIBHHHHH', bytes(values[0:16]))
     retDict = {}
-    retDict["valid"] = (handle == 0x1e and data[0] == 0x6f)
+    retDict["valid"] = (handle == Handle_body and data[0] == 0x6f)
     if data[1] < sys.maxint:
         retDict["timestamp"] = data[1]
     else:
