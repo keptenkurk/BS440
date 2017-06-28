@@ -17,6 +17,7 @@ Char_body = '00008a21-0000-1000-8000-00805f9b34fb'  # body data
 Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
 
 
+
 def processIndication(handle, values):
     '''
     Indication handler
@@ -167,7 +168,7 @@ while True:
             timestamp = bytearray(pack('<I', int(time.time())))
             timestamp.insert(0, 2)
             try:
-                device.char_write_handle(0x23, timestamp,
+                device.char_write_handle(device.gethandle(Char_person), timestamp,
                                          wait_for_response=True)
             except pygatt.exceptions.NotificationTimeout:
                 pass
