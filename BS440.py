@@ -68,7 +68,10 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-            device = adapter.connect(address, 8, pygatt.BLEAddressType.random)
+            if device_model == 'BS410':
+                device = adapter.connect(address, 8, pygatt.BLEAddressType.public)
+            else:
+                device = adapter.connect(address, 8, pygatt.BLEAddressType.random)
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1
@@ -118,6 +121,7 @@ sys.path.pop(0)
 
 ble_address = config.get('Scale', 'ble_address')
 device_name = config.get('Scale', 'device_name')
+device_model = config.get('Scale', 'device_model')
 '''
 Start BLE comms and run that forever
 '''
