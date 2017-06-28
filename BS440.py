@@ -11,7 +11,10 @@ import sys
 
 from BS440decode import *
 
-
+# Interesting characteristics
+Char_weight = '00008a22-0000-1000-8000-00805f9b34fb'  # weight data
+Char_body = '00008a21-0000-1000-8000-00805f9b34fb'  # body data
+Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
 
 
 def processIndication(handle, values):
@@ -22,21 +25,21 @@ def processIndication(handle, values):
     handle: byte
     value: bytearray
     '''
-    if handle == 0x25:
+    if handle == device.gethandle(Char_person):
         result = decodePerson(handle, values)
         if result not in persondata:
             log.info(str(result))
             persondata.append(result)
         else:
             log.info('Duplicate persondata record')
-    elif handle == 0x1b:
+    elif handle == device.gethandle(Char_weight):
         result = decodeWeight(handle, values)
         if result not in weightdata:
             log.info(str(result))
             weightdata.append(result)
         else:
             log.info('Duplicate weightdata record')
-    elif handle == 0x1e:
+    elif handle == device.gethandle(Char_body):
         result = decodeBody(handle, values)
         if result not in bodydata:
             log.info(str(result))
@@ -138,13 +141,13 @@ while True:
         process the data received.
         '''
         try:
-            device.subscribe('00008a22-0000-1000-8000-00805f9b34fb',
+            device.subscribe(Char_weight,
                              callback=processIndication,
                              indication=True)
-            device.subscribe('00008a21-0000-1000-8000-00805f9b34fb',
+            device.subscribe(Char_body,
                              callback=processIndication,
                              indication=True)
-            device.subscribe('00008a82-0000-1000-8000-00805f9b34fb',
+            device.subscribe(Char_person,
                              callback=processIndication,
                              indication=True)
         except pygatt.exceptions.NotConnectedError:
