@@ -177,7 +177,7 @@ while True:
                 timestamp = bytearray(pack('<I', int(time.time())))               
             timestamp.insert(0, 2)
             try:
-                device.char_write_handle(device.get_handle(handle_command), timestamp,
+                device.char_write_handle(handle_command, timestamp,
                                          wait_for_response=True)
             except pygatt.exceptions.NotificationTimeout:
                 pass
