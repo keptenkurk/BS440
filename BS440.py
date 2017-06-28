@@ -27,21 +27,21 @@ def processIndication(handle, values):
     handle: byte
     value: bytearray
     '''
-    if handle == Handle_person:
+    if handle == handle_person:
         result = decodePerson(handle, values)
         if result not in persondata:
             log.info(str(result))
             persondata.append(result)
         else:
             log.info('Duplicate persondata record')
-    elif handle == Handle_weight:
+    elif handle == handle_weight:
         result = decodeWeight(handle, values)
         if result not in weightdata:
             log.info(str(result))
             weightdata.append(result)
         else:
             log.info('Duplicate weightdata record')
-    elif handle == Handle_body:
+    elif handle == handle_body:
         result = decodeBody(handle, values)
         if result not in bodydata:
             log.info(str(result))
@@ -142,10 +142,10 @@ while True:
         weightdata = []
         bodydata = []
         
-        Handle_body = device.get_handle(Char_body)
-        Handle_person = device.get_handle(Char_person)
-        Handle_weight = device.get_handle(Char_weight)
-        Handle_command = device.get_handle(Char_command)
+        handle_body = device.get_handle(Char_body)
+        handle_person = device.get_handle(Char_person)
+        handle_weight = device.get_handle(Char_weight)
+        handle_command = device.get_handle(Char_command)
         continue_comms = True
         '''
         subscribe to characteristics and have processIndication
@@ -177,7 +177,7 @@ while True:
                 timestamp = bytearray(pack('<I', int(time.time())))               
             timestamp.insert(0, 2)
             try:
-                device.char_write_handle(device.get_handle(Handle_command), timestamp,
+                device.char_write_handle(device.get_handle(handle_command), timestamp,
                                          wait_for_response=True)
             except pygatt.exceptions.NotificationTimeout:
                 pass
