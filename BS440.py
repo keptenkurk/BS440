@@ -14,6 +14,7 @@ from BS440decode import *
 # Interesting characteristics
 Char_weight = '00008a22-0000-1000-8000-00805f9b34fb'  # weight data
 Char_body = '00008a21-0000-1000-8000-00805f9b34fb'  # body data
+Char_command = '00008a81-0000-1000-8000-00805f9b34fb' # command register
 Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
 Time_offset = 1262304000
 
@@ -26,21 +27,21 @@ def processIndication(handle, values):
     handle: byte
     value: bytearray
     '''
-    if handle == device.gethandle(Char_person):
+    if handle == device.get_handle(Char_person):
         result = decodePerson(handle, values)
         if result not in persondata:
             log.info(str(result))
             persondata.append(result)
         else:
             log.info('Duplicate persondata record')
-    elif handle == device.gethandle(Char_weight):
+    elif handle == device.get_handle(Char_weight):
         result = decodeWeight(handle, values)
         if result not in weightdata:
             log.info(str(result))
             weightdata.append(result)
         else:
             log.info('Duplicate weightdata record')
-    elif handle == device.gethandle(Char_body):
+    elif handle == device.get_handle(Char_body):
         result = decodeBody(handle, values)
         if result not in bodydata:
             log.info(str(result))
@@ -165,13 +166,13 @@ while True:
         arrive, the scale will emit 30 Indications on 0x1b and 0x1e each.
         '''
         if continue_comms:
-            if device_model == 'BS410'
+            if device_model == 'BS410':
                 timestamp = bytearray(pack('<I', int(time.time() - Time_offset)))
             else:
                 timestamp = bytearray(pack('<I', int(time.time())))               
             timestamp.insert(0, 2)
             try:
-                device.char_write_handle(device.gethandle(Char_person), timestamp,
+                device.char_write_handle(device.get_handle(Char_command), timestamp,
                                          wait_for_response=True)
             except pygatt.exceptions.NotificationTimeout:
                 pass
