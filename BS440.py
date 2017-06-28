@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: ascii
+
 from __future__ import print_function
 import pygatt.backends
 import logging
@@ -12,31 +15,29 @@ import sys
 from BS440decode import *
 
 
-
-
 def processIndication(handle, values):
     '''
     Indication handler
     receives indication and stores values into result Dict
-    (see medisanaBLE for Dict definition)
+    (see BS440decode.py for Dict definition)
     handle: byte
     value: bytearray
     '''
-    if handle == 0x25:
+    if handle == person_handle:
         result = decodePerson(handle, values)
         if result not in persondata:
             log.info(str(result))
             persondata.append(result)
         else:
             log.info('Duplicate persondata record')
-    elif handle == 0x1b:
+    elif handle == weight_handle:
         result = decodeWeight(handle, values)
         if result not in weightdata:
             log.info(str(result))
             weightdata.append(result)
         else:
             log.info('Duplicate weightdata record')
-    elif handle == 0x1e:
+    elif handle == body_handle:
         result = decodeBody(handle, values)
         if result not in bodydata:
             log.info(str(result))
@@ -51,9 +52,10 @@ def wait_for_device(devname):
     found = False
     while not found:
         try:
-            found = adapter.filtered_scan(devname)
             # wait for scale to wake up and connect to it
+            found = adapter.filtered_scan(devname)
         except pygatt.exceptions.BLEError:
+            # reset adapter when (see issue #33)
             adapter.reset()
     return
 
@@ -64,7 +66,7 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
+            device = adapter.connect(address, timeout, pygatt_address_type)
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1
@@ -72,7 +74,7 @@ def connect_device(address):
 
 
 def init_ble_mode():
-    p = subprocess.Popen("sudo btmgmt le on", stdout=subprocess.PIPE,
+    p = subprocess.Popen("btmgmt le on", stdout=subprocess.PIPE,
                          shell=True)
     (output, err) = p.communicate()
     if not err:
@@ -85,22 +87,22 @@ def init_ble_mode():
 '''
 Main program loop
 '''
-config = SafeConfigParser()
-config.read('BS440.ini')
+programConfig = SafeConfigParser()
+programConfig.read('BS440.ini')
 path = "plugins/"
 plugins = {}
 
 # set up logging
 numeric_level = getattr(logging,
-                        config.get('Program', 'loglevel').upper(),
+                        programConfig.get('Program', 'loglevel').upper(),
                         None)
 if not isinstance(numeric_level, int):
     raise ValueError('Invalid log level: %s' % loglevel)
 logging.basicConfig(level=numeric_level,
                     format='%(asctime)s %(levelname)-8s %(funcName)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename=config.get('Program', 'logfile'),
-                    filemode='w')
+                    filename=programConfig.get('Program', 'logfile'),
+                    filemode='a')
 log = logging.getLogger(__name__)
 
 # Search for plugins in subdir "plugins" with name BS440*.py
@@ -112,8 +114,28 @@ for f in os.listdir(path):
         plugins[fname] = mod.Plugin()
 sys.path.pop(0)
 
-ble_address = config.get('Scale', 'ble_address')
-device_name = config.get('Scale', 'device_name')
+# Retrieve user configuration
+ble_address = programConfig.get('Scale', 'ble_address')
+device_name = programConfig.get('Scale', 'device_name')
+device_model = programConfig.get('Scale', 'device_model')
+timeout = int(programConfig.get('Program', 'timeout'))
+
+# Retrieve scale configuration in subdir "models"
+scaleConfig = SafeConfigParser()
+scaleConfig.read('models/' + str(device_model) + '.ini')
+person_handle = int(scaleConfig.get('ScaleConfiguration', 'person_handle'), 16)
+weight_handle = int(scaleConfig.get('ScaleConfiguration', 'weight_handle'), 16)
+body_handle = int(scaleConfig.get('ScaleConfiguration', 'body_handle'), 16)
+write_handle = int(scaleConfig.get('ScaleConfiguration', 'write_handle'), 16)
+address_type = scaleConfig.get('ScaleConfiguration', 'address_type')
+if str(address_type) == "random":
+	pygatt_address_type = pygatt.BLEAddressType.random
+elif str(address_type) == "public":
+	pygatt_address_type = pygatt.BLEAddressType.public
+else:
+	log.debug('Address type should be either \'random\' or \'public\'. It was \'' + str(address_type) + '\'.')
+	sys.exit()
+
 '''
 Start BLE comms and run that forever
 '''
@@ -151,9 +173,10 @@ while True:
 
         '''
         Send the unix timestamp in little endian order preceded by 02 as
-        bytearray to handle 0x23. This will resync the scale's RTC.
-        While waiting for a response notification, which will never
-        arrive, the scale will emit 30 Indications on 0x1b and 0x1e each.
+        bytearray to write_handle (0x23 for BS440). This will resync the scale's RTC.
+        While waiting for a response notification, which will never arrive, 
+		the scale will emit 30 Indications on weight_handle (0x1b for BS440) 
+		and body_handle (0x1e for BS440) each.
         '''
         if continue_comms:
             timestamp = bytearray(pack('<I', int(time.time())))
@@ -178,6 +201,8 @@ while True:
                     
                     # Run all plugins found
                     for plugin in plugins.values():
-                        plugin.execute(config, persondata, weightdatasorted, bodydatasorted)
+                        plugin.execute(programConfig, persondata, weightdatasorted, bodydatasorted)
                 else:
-                    log.error('Unreliable data received. Unable to process')
+					log.error('Unreliable data received. Unable to process')
+	else:
+		log.debug('Failed to connect to the scale with address ' + str(ble_address) + '.')
