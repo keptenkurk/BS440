@@ -12,8 +12,8 @@ import sys
 from BS440decode import *
 
 # Interesting characteristics
-Char_weight = '00008a22-0000-1000-8000-00805f9b34fb'  # weight data
-Char_body = '00008a21-0000-1000-8000-00805f9b34fb'  # body data
+Char_weight = '00008a21-0000-1000-8000-00805f9b34fb'  # weight data
+Char_body = '00008a22-0000-1000-8000-00805f9b34fb' # body data
 Char_command = '00008a81-0000-1000-8000-00805f9b34fb' # command register
 Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
 Time_offset = 1262304000
