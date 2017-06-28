@@ -15,7 +15,7 @@ from BS440decode import *
 Char_weight = '00008a22-0000-1000-8000-00805f9b34fb'  # weight data
 Char_body = '00008a21-0000-1000-8000-00805f9b34fb'  # body data
 Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
-
+Time_offset = 1262304000
 
 
 def processIndication(handle, values):
@@ -165,7 +165,10 @@ while True:
         arrive, the scale will emit 30 Indications on 0x1b and 0x1e each.
         '''
         if continue_comms:
-            timestamp = bytearray(pack('<I', int(time.time())))
+            if device_model == 'BS410'
+                timestamp = bytearray(pack('<I', int(time.time() - Time_offset)))
+            else:
+                timestamp = bytearray(pack('<I', int(time.time())))               
             timestamp.insert(0, 2)
             try:
                 device.char_write_handle(device.gethandle(Char_person), timestamp,
