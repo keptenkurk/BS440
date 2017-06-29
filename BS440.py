@@ -9,21 +9,118 @@ from binascii import hexlify
 import os
 import sys
 
-from BS440decode import *
 
 # Interesting characteristics
 Char_weight = '00008a21-0000-1000-8000-00805f9b34fb'  # weight data
 Char_body = '00008a22-0000-1000-8000-00805f9b34fb' # body data
 Char_command = '00008a81-0000-1000-8000-00805f9b34fb' # command register
 Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
-Time_offset = 1262304000
+# On BS410 time=0 equals 1/1/2010. Time_offset is used to convert to unix standard
+Time_offset = 1262304000          
+
+'''
+The decode functions Read Medisana BS440 Scale hex Indication and 
+decodes scale values from hex data string.
+Each function receives the hex handle and bytevalues and
+return a dictionary with the decoded data
+'''
+
+def decodePerson(handle, values):
+    '''
+    decodePerson
+    handle: 0x25
+    values[0] = 0x84
+    Returns a dict for convenience:
+        valid (True, False)
+        person (1..9)
+        gender (male|female)
+        age (0..255 years)
+        size (0..255 cm)
+        activity (normal|high)
+    '''
+    data = unpack('BxBxBBBxB', bytes(values[0:9]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x84)
+    retDict["person"] = data[1]
+    if data[2] == 1:
+        retDict["gender"] = "male"
+    else:
+        retDict["gender"] = "female"
+    retDict["age"] = data[3]
+    retDict["size"] = data[4]
+    if data[5] == 3:
+        retDict["activity"] = "high"
+    else:
+        retDict["activity"] = "normal"
+    return retDict
+
+
+def decodeWeight(handle, values):
+    '''
+    decodeWeight
+    Handle: 0x1b
+    Byte[0] = 0x1d
+    Returns:
+        valid (True, False)
+        weight (5,0 .. 180,0 kg)
+        timestamp (unix timestamp date and time of measurement)
+        person (1..9)
+        note: in python 2.7 to force results to be floats,
+        devide by float.
+        '''
+    data = unpack('<BHxxIxxxxB', bytes(values[0:14]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x1d)
+    retDict["weight"] = data[1]/100.0
+    if data[2] < sys.maxint:
+        retDict["timestamp"] = data[2]
+        if device_model == 'BS410':
+            retDict["timestamp"] += Time_offset
+    else:
+        retDict["timestamp"] = 0
+    retDict["person"] = data[3]
+    return retDict
+
+
+def decodeBody(handle, values):
+    '''
+    decodeBody
+    Handle: 0x1e
+    Byte[0] = 0x6f
+    Returns:
+        valid (True, False)
+        timestamp (unix timestamp date and time of measurement)
+        person (1..9)
+        kcal = (0..65025 Kcal)
+        fat = (0..100,0 %)  percentage of body fat
+        tbw = (0..100,0 %) percentage of water
+        muscle = (0..100,0 %) percentage of muscle
+        bone = (0..100,0) bone weight
+        note: in python 2.7 to force results to be floats: devide by float.
+    '''
+    data = unpack('<BIBHHHHH', bytes(values[0:16]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x6f)
+    if data[1] < sys.maxint:
+        retDict["timestamp"] = data[1]
+        if device_model == 'BS410':
+            retDict["timestamp"] += Time_offset
+    else:
+        retDict["timestamp"] = 0
+    retDict["person"] = data[2]
+    retDict["kcal"] = data[3]
+    retDict["fat"] = (0x0fff & data[4])/10.0
+    retDict["tbw"] = (0x0fff & data[5])/10.0
+    retDict["muscle"] = (0x0fff & data[6])/10.0
+    retDict["bone"] = (0x0fff & data[7])/10.0
+    return retDict
 
 
 def processIndication(handle, values):
     '''
-    Indication handler
-    receives indication and stores values into result Dict
-    (see BS440decode.py for Dict definition)
+    Indication handler:
+    Receives indication and stores values into result Dict
+    (see decode functions for Dict definition)
     handle: byte
     value: bytearray
     '''
