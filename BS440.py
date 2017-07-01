@@ -12,11 +12,10 @@ import sys
 
 # Interesting characteristics
 Char_weight = '00008a21-0000-1000-8000-00805f9b34fb'  # weight data
-Char_body = '00008a22-0000-1000-8000-00805f9b34fb' # body data
-Char_command = '00008a81-0000-1000-8000-00805f9b34fb' # command register
+Char_body = '00008a22-0000-1000-8000-00805f9b34fb'  # body data
+Char_command = '00008a81-0000-1000-8000-00805f9b34fb'  # command register
 Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
-# On BS410 time=0 equals 1/1/2010. Time_offset is used to convert to unix standard
-Time_offset = 1262304000          
+         
 
 '''
 The decode functions Read Medisana BS440 Scale hex Indication and 
@@ -73,9 +72,7 @@ def decodeWeight(handle, values):
     retDict["valid"] = (data[0] == 0x1d)
     retDict["weight"] = data[1]/100.0
     if data[2] < sys.maxint:
-        retDict["timestamp"] = data[2]
-        if device_model == 'BS410':
-            retDict["timestamp"] += Time_offset
+        retDict["timestamp"] = data[2] + time_offset
     else:
         retDict["timestamp"] = 0
     retDict["person"] = data[3]
@@ -102,9 +99,7 @@ def decodeBody(handle, values):
     retDict = {}
     retDict["valid"] = (data[0] == 0x6f)
     if data[1] < sys.maxint:
-        retDict["timestamp"] = data[1]
-        if device_model == 'BS410':
-            retDict["timestamp"] += Time_offset
+        retDict["timestamp"] = data[1] + time_offset
     else:
         retDict["timestamp"] = 0
     retDict["person"] = data[2]
@@ -167,10 +162,7 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-            if device_model == 'BS410':
-                device = adapter.connect(address, 8, pygatt.BLEAddressType.public)
-            else:
-                device = adapter.connect(address, 8, pygatt.BLEAddressType.random)
+            device = adapter.connect(address, 8, addresstype)
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1
@@ -234,6 +226,16 @@ sys.path.pop(0)
 ble_address = config.get('Scale', 'ble_address')
 device_name = config.get('Scale', 'device_name')
 device_model = config.get('Scale', 'device_model')
+
+if device_model == 'BS410':
+    addresstype = pygatt.BLEAddressType.public
+    # On BS410 time=0 equals 1/1/2010. 
+    # time_offset is used to convert to unix standard
+    time_offset = 1262304000
+else:
+    addresstype = pygatt.BLEAddressType.random
+    time_offset = 0
+    
 '''
 Start BLE comms and run that forever
 '''
@@ -281,10 +283,7 @@ while True:
         arrive, the scale will emit 30 Indications on 0x1b and 0x1e each.
         '''
         if continue_comms:
-            if device_model == 'BS410':
-                timestamp = bytearray(pack('<I', int(time.time() - Time_offset)))
-            else:
-                timestamp = bytearray(pack('<I', int(time.time())))               
+            timestamp = bytearray(pack('<I', int(time.time() - time_offset)))
             timestamp.insert(0, 2)
             try:
                 device.char_write_handle(handle_command, timestamp,
