@@ -208,6 +208,11 @@ logging.basicConfig(level=numeric_level,
                     filename=config.get('Program', 'logfile'),
                     filemode='w')
 log = logging.getLogger(__name__)
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(numeric_level)
+formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(funcName)s %(message)s')
+ch.setFormatter(formatter)
+log.addHandler(ch)
 
 # Search for plugins in subdir "plugins" with name BS440*.py
 sys.path.insert(0, path)
