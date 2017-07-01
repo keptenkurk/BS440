@@ -21,8 +21,8 @@ https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-blueto
 	USB device strings: Mfr=1, Product=2, SerialNumber=3
 	Product: BCM20702A0
 * Bluez
-  * 5.44
-  * 5.23-2+rpi2 (from package manager)
+  * 5.44 (from source)
+  * 5.23-2+rpi2 (from package manager)
 * Pygatt 3.0.0 installed
 
 
@@ -32,7 +32,7 @@ scale. When received, it passes the information to all found data processors fou
 the plugin folder.
 
 # Preferences
-Before using this app, copy __BS440.example.ini_ to _BS440.ini_ and personalize your settings.
+Before using this app, copy `BS440.example.ini` to `BS440.ini` and personalize your settings.
 This file contains the general parameters for communicating with the scale, and which plugins to use.
 
 # Plugins
