@@ -1,1 +1,2 @@
-BS440*
+*.ini
+!*.example.ini
