@@ -9,34 +9,136 @@ from binascii import hexlify
 import os
 import sys
 
-from BS440decode import *
+
+# Interesting characteristics
+Char_weight = '00008a21-0000-1000-8000-00805f9b34fb'  # weight data
+Char_body = '00008a22-0000-1000-8000-00805f9b34fb' # body data
+Char_command = '00008a81-0000-1000-8000-00805f9b34fb' # command register
+Char_person = '00008a82-0000-1000-8000-00805f9b34fb'  # person data
+# On BS410 time=0 equals 1/1/2010. Time_offset is used to convert to unix standard
+Time_offset = 1262304000          
+
+'''
+The decode functions Read Medisana BS440 Scale hex Indication and 
+decodes scale values from hex data string.
+Each function receives the hex handle and bytevalues and
+return a dictionary with the decoded data
+'''
+
+def decodePerson(handle, values):
+    '''
+    decodePerson
+    handle: 0x25
+    values[0] = 0x84
+    Returns a dict for convenience:
+        valid (True, False)
+        person (1..9)
+        gender (male|female)
+        age (0..255 years)
+        size (0..255 cm)
+        activity (normal|high)
+    '''
+    data = unpack('BxBxBBBxB', bytes(values[0:9]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x84)
+    retDict["person"] = data[1]
+    if data[2] == 1:
+        retDict["gender"] = "male"
+    else:
+        retDict["gender"] = "female"
+    retDict["age"] = data[3]
+    retDict["size"] = data[4]
+    if data[5] == 3:
+        retDict["activity"] = "high"
+    else:
+        retDict["activity"] = "normal"
+    return retDict
 
 
+def decodeWeight(handle, values):
+    '''
+    decodeWeight
+    Handle: 0x1b
+    Byte[0] = 0x1d
+    Returns:
+        valid (True, False)
+        weight (5,0 .. 180,0 kg)
+        timestamp (unix timestamp date and time of measurement)
+        person (1..9)
+        note: in python 2.7 to force results to be floats,
+        devide by float.
+        '''
+    data = unpack('<BHxxIxxxxB', bytes(values[0:14]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x1d)
+    retDict["weight"] = data[1]/100.0
+    if data[2] < sys.maxint:
+        retDict["timestamp"] = data[2]
+        if device_model == 'BS410':
+            retDict["timestamp"] += Time_offset
+    else:
+        retDict["timestamp"] = 0
+    retDict["person"] = data[3]
+    return retDict
+
+
+def decodeBody(handle, values):
+    '''
+    decodeBody
+    Handle: 0x1e
+    Byte[0] = 0x6f
+    Returns:
+        valid (True, False)
+        timestamp (unix timestamp date and time of measurement)
+        person (1..9)
+        kcal = (0..65025 Kcal)
+        fat = (0..100,0 %)  percentage of body fat
+        tbw = (0..100,0 %) percentage of water
+        muscle = (0..100,0 %) percentage of muscle
+        bone = (0..100,0) bone weight
+        note: in python 2.7 to force results to be floats: devide by float.
+    '''
+    data = unpack('<BIBHHHHH', bytes(values[0:16]))
+    retDict = {}
+    retDict["valid"] = (data[0] == 0x6f)
+    if data[1] < sys.maxint:
+        retDict["timestamp"] = data[1]
+        if device_model == 'BS410':
+            retDict["timestamp"] += Time_offset
+    else:
+        retDict["timestamp"] = 0
+    retDict["person"] = data[2]
+    retDict["kcal"] = data[3]
+    retDict["fat"] = (0x0fff & data[4])/10.0
+    retDict["tbw"] = (0x0fff & data[5])/10.0
+    retDict["muscle"] = (0x0fff & data[6])/10.0
+    retDict["bone"] = (0x0fff & data[7])/10.0
+    return retDict
 
 
 def processIndication(handle, values):
     '''
-    Indication handler
-    receives indication and stores values into result Dict
-    (see BS440decode.py for Dict definition)
+    Indication handler:
+    Receives indication and stores values into result Dict
+    (see decode functions for Dict definition)
     handle: byte
     value: bytearray
     '''
-    if handle == 0x25:
+    if handle == handle_person:
         result = decodePerson(handle, values)
         if result not in persondata:
             log.info(str(result))
             persondata.append(result)
         else:
             log.info('Duplicate persondata record')
-    elif handle == 0x1b:
+    elif handle == handle_weight:
         result = decodeWeight(handle, values)
         if result not in weightdata:
             log.info(str(result))
             weightdata.append(result)
         else:
             log.info('Duplicate weightdata record')
-    elif handle == 0x1e:
+    elif handle == handle_body:
         result = decodeBody(handle, values)
         if result not in bodydata:
             log.info(str(result))
@@ -65,7 +167,10 @@ def connect_device(address):
     device = None
     while not device_connected and tries > 0:
         try:
-            device = adapter.connect(address, 5, pygatt.BLEAddressType.random)
+            if device_model == 'BS410':
+                device = adapter.connect(address, 8, pygatt.BLEAddressType.public)
+            else:
+                device = adapter.connect(address, 8, pygatt.BLEAddressType.random)
             device_connected = True
         except pygatt.exceptions.NotConnectedError:
             tries -= 1
@@ -115,6 +220,7 @@ sys.path.pop(0)
 
 ble_address = config.get('Scale', 'ble_address')
 device_name = config.get('Scale', 'device_name')
+device_model = config.get('Scale', 'device_model')
 '''
 Start BLE comms and run that forever
 '''
@@ -132,19 +238,24 @@ while True:
         persondata = []
         weightdata = []
         bodydata = []
+        
+        handle_body = device.get_handle(Char_body)
+        handle_person = device.get_handle(Char_person)
+        handle_weight = device.get_handle(Char_weight)
+        handle_command = device.get_handle(Char_command)
         continue_comms = True
         '''
         subscribe to characteristics and have processIndication
         process the data received.
         '''
         try:
-            device.subscribe('00008a22-0000-1000-8000-00805f9b34fb',
+            device.subscribe(Char_weight,
                              callback=processIndication,
                              indication=True)
-            device.subscribe('00008a21-0000-1000-8000-00805f9b34fb',
+            device.subscribe(Char_body,
                              callback=processIndication,
                              indication=True)
-            device.subscribe('00008a82-0000-1000-8000-00805f9b34fb',
+            device.subscribe(Char_person,
                              callback=processIndication,
                              indication=True)
         except pygatt.exceptions.NotConnectedError:
@@ -157,10 +268,13 @@ while True:
         arrive, the scale will emit 30 Indications on 0x1b and 0x1e each.
         '''
         if continue_comms:
-            timestamp = bytearray(pack('<I', int(time.time())))
+            if device_model == 'BS410':
+                timestamp = bytearray(pack('<I', int(time.time() - Time_offset)))
+            else:
+                timestamp = bytearray(pack('<I', int(time.time())))               
             timestamp.insert(0, 2)
             try:
-                device.char_write_handle(0x23, timestamp,
+                device.char_write_handle(handle_command, timestamp,
                                          wait_for_response=True)
             except pygatt.exceptions.NotificationTimeout:
                 pass
