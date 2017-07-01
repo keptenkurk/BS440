@@ -30,8 +30,8 @@ scale. When received, it passes the information to all found data processors fou
 the plugin folder.
 
 # Preferences
-Before using this app, personalize your settings in the file _BS440.ini_.
-file _BS440.ini_, contains the general parameters for communicating with the scale.
+Before using this app, copy __BS440.example.ini_ to _BS440.ini_ and personalize your settings.
+This file contains the general parameters for communicating with the scale.
 
 # Plugins
 Currenly these plugins are currently available
@@ -43,7 +43,9 @@ BS440runalizel: Store data to local Runalyze database
 
 Plugins are found in the plugin folder and named BS440pluginname.py. Each plugin uses
 its private .ini file named BS440pluginname.ini
-Disabled plugins are renamed to _BS440pluginname.py.
+To enable a plugin, copy or symlink it to the name without leading underscore.
+Eg.: `ln -s plugins/_BS440pluginname.py plugins/BS440mail.py`
+
 Directions on how to install prequisits, configure and use a specific plugin is found
 in the Wiki
   
