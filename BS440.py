@@ -214,13 +214,21 @@ formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(funcName)s %(messag
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
-# Search for plugins in subdir "plugins" with name BS440*.py
-sys.path.insert(0, path)
-for f in os.listdir(path):
-    fname, ext = os.path.splitext(f)
-    if ext == '.py' and fname.startswith('BS440'):
-        mod = __import__(fname)
-        plugins[fname] = mod.Plugin()
+# Load configured plugins
+
+if config.has_option('Program', 'plugins'):
+    config_plugins = config.get('Program', 'plugins').split(',')
+    config_plugins = [plugin.strip(' ') for plugin in config_plugins]
+    log.info('Configured plugins: %s' % ', '.join(config_plugins))
+
+    sys.path.insert(0, path)
+    for plugin in config_plugins:
+        log.info('Loading plugin: %s' % plugin)
+        mod = __import__(plugin)
+        plugins[plugin] = mod.Plugin()
+    log.info('All plugins loaded.')
+else:
+    log.info('No plugins configured.')
 sys.path.pop(0)
 
 ble_address = config.get('Scale', 'ble_address')
