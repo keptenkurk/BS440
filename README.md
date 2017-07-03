@@ -21,8 +21,8 @@ https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-blueto
 	USB device strings: Mfr=1, Product=2, SerialNumber=3
 	Product: BCM20702A0
 * Bluez
-  * 5.44 (from source)
-  * 5.23-2+rpi2 (from package manager)
+  - 5.44 (from source)
+  - 5.23-2+rpi2 (from package manager)
 * Pygatt 3.0.0 installed
 
 
