@@ -73,9 +73,25 @@ class Plugin:
         log.info('ini read from: ' + configfile)
         
         # --- start plugin specifics here
-        FromAddr = pluginconfig.get('Email', 'sender_email')
-        Password = pluginconfig.get('Email', 'sender_pwd')
-        CcAddr = [pluginconfig.get('Email', 'sender_email')]
+
+        if pluginconfig.has_option('Email', 'smtp_server'):
+            SmtpServer = pluginconfig.get('Email', 'smtp_server')
+        else:
+            SmtpServer = ''
+        if pluginconfig.has_option('Email', 'start_tls'):
+            StartTls = pluginconfig.getboolean('Email', 'start_tls')
+        else:
+            StartTls = False
+        FromAddr = pluginconfig.get('Email', 'sender')
+        if pluginconfig.has_option('Email', 'login'):
+            Login = pluginconfig.get('Email', 'login')
+        else:
+            Login = False
+        if pluginconfig.has_option('Email', 'password'):
+            Password = pluginconfig.get('Email', 'password')
+        else:
+            Password = False
+        CcAddr = [pluginconfig.get('Email', 'sender')]
         personsection = 'Person' + str(persondata[0]['person'])
         if pluginconfig.has_section(personsection):
             ToName = pluginconfig.get(personsection, 'username')
@@ -133,7 +149,7 @@ class Plugin:
                 <br>
                 <br>
                 Groeten,<br>
-                Paul.<br>
+                De weegschaal.<br>
                 </p>
             </body>
         </html>
@@ -163,16 +179,20 @@ class Plugin:
         msg['Cc'] = ', '.join(CcAddr)
         body = email.mime.Text.MIMEText(content, 'html')
         msg.attach(body)
-        # send via Gmail server
+        # send via smtp server
         log.info('Sending email to ' + ToName + ' at ' + msg['To'])
         try:
-            s = smtplib.SMTP('smtp.gmail.com:587')
-            s.starttls()
-            s.login(FromAddr, Password)
+            s = smtplib.SMTP(SmtpServer)
+            if StartTls:
+                s.starttls()
+            if Login and Password:
+                s.login(Login, Password)
+
             s.sendmail(FromAddr, ToAddr+CcAddr, msg.as_string())
             s.quit()
             log.info('E-mail successfully sent.')
-        except smtplib.SMTPException:
-            log.error('Failed to send e-mail.')
-            
+        except smtplib.SMTPException as e:
+            log.error('Failed to send e-mail:')
+            log.error(e)
+
         log.info('Finished plugin: ' + __name__)
