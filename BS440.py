@@ -53,6 +53,18 @@ def decodePerson(handle, values):
         retDict["activity"] = "normal"
     return retDict
 
+def sanitize_timestamp(timestamp):
+    retTS = 0
+    if timestamp + time_offset < sys.maxint:
+        retTS = timestamp + time_offset
+    else:
+        retTS = timestamp
+
+    if timestamp >= sys.maxint:
+        retTS = 0
+
+    return retTS
+
 
 def decodeWeight(handle, values):
     '''
@@ -71,10 +83,7 @@ def decodeWeight(handle, values):
     retDict = {}
     retDict["valid"] = (data[0] == 0x1d)
     retDict["weight"] = data[1]/100.0
-    if data[2] < sys.maxint:
-        retDict["timestamp"] = data[2] + time_offset
-    else:
-        retDict["timestamp"] = 0
+    retDict["timestamp"] = sanitize_timestamp(data[2])
     retDict["person"] = data[3]
     return retDict
 
@@ -98,10 +107,7 @@ def decodeBody(handle, values):
     data = unpack('<BIBHHHHH', bytes(values[0:16]))
     retDict = {}
     retDict["valid"] = (data[0] == 0x6f)
-    if data[1] < sys.maxint:
-        retDict["timestamp"] = data[1] + time_offset
-    else:
-        retDict["timestamp"] = 0
+    retDict["timestamp"] = sanitize_timestamp(data[1])
     retDict["person"] = data[2]
     retDict["kcal"] = data[3]
     retDict["fat"] = (0x0fff & data[4])/10.0
