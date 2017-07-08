@@ -14,7 +14,7 @@ https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-blueto
 
 # Tested on:
 * Raspberry Pi B+ running latest Jessie
-	4.4.38+ #938 
+	4.4.38+ #938
 	Thu Dec 15 15:17:54 GMT 2016 armv6l GNU/Linux)
 * USB bluetooth adapter:
 	USB device found, idVendor=0a5c, idProduct=21e8
@@ -27,7 +27,7 @@ https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-blueto
 
 
 # Description
-BS440 listens for information from a Medisana BS410/BS430/BS440/BS444 or compatible bluetooth 
+BS440 listens for information from a Medisana BS410/BS430/BS440/BS444 or compatible bluetooth
 scale. When received, it passes the information to all found data processors found in
 the plugin folder.
 
@@ -49,7 +49,7 @@ To enable a plugin, add it to the `plugins` key in `BS440.ini`.
 
 Directions on how to install prerequisites, configure and use a specific plugin is found
 in the Wiki
-  
+
 ## BS440mail
 Maintainer: Keptenkurk
 
@@ -58,13 +58,13 @@ Last 3 results are mailed to the user mail adress as configured in BS440mail.ini
 ## BS440csv
 Maintainer: DjZU
 
-Data is added to a local CSV file. Data is presented by running plotBS440.py which 
+Data is added to a local CSV file. Data is presented by running plotBS440.py which
 starts a webserver and serves graphs to the user.
 
 ## Domoticz
 Maintainer: Tristan79 - Status: Testing
 
-Configure the Domoticz and user details in BS440domoticz.ini.  
+Configure the Domoticz and user details in BS440domoticz.ini.
 When data is received, the sensors will be automatically generated. That easy!
 
 The optional option _hardware_name_ is the name of the dummy hardware to you can use,
@@ -83,6 +83,11 @@ BS440google updates weight and fat parameters in Google fit (http://fit.google.c
 For creating an account and authentication file please see the Wiki for this
 repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 
+# Stand-alone web server
+
+You can use any web server to serve a static site based on the `csv` files. You can find a
+working example using the Caddy webserver in [dist/caddy/](dist/caddy/).
+
 # Thanks to
 * Christopher Peplin - maintainer of Pygatt
 * Tristan79 - Domoticz plugin
@@ -91,5 +96,5 @@ repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 * Raudi, Remb0, Edmundo
 
 # Disclaimer
-This software is built out of personal interest and not related to 
+This software is built out of personal interest and not related to
 Medisana AG in any way.
