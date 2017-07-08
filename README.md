@@ -13,8 +13,9 @@ https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-blueto
 * Installed Bluez
 
 # Tested on:
+
 * Raspberry Pi B+ running latest Jessie
-	4.4.38+ #938 
+	4.4.38+ #938
 	Thu Dec 15 15:17:54 GMT 2016 armv6l GNU/Linux)
 * USB bluetooth adapter:
 	USB device found, idVendor=0a5c, idProduct=21e8
@@ -26,14 +27,38 @@ https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-blueto
 * Pygatt 3.0.0 installed
 
 
+* Raspberry Pi Zero W running DietPi V153
+	4.9.35+ #1
+	Tue Jul 4 17:16:26 UTC 2017 armv6l GNU/Linux
+* onboard bluetooth adapter
+* Bluez
+  - 5.23-2+rpi2 (from package manager)
+* Pygatt 3.0.0 installed
+
 # Description
-BS440 listens for information from a Medisana BS410/BS430/BS440/BS444 or compatible bluetooth 
+BS440 listens for information from a Medisana BS410/BS430/BS440/BS444 or compatible bluetooth
 scale. When received, it passes the information to all found data processors found in
 the plugin folder.
 
 # Preferences
 Before using this app, copy `BS440.example.ini` to `BS440.ini` and personalize your settings.
 This file contains the general parameters for communicating with the scale, and which plugins to use.
+
+# Automatically start
+
+Copy the right files from the `dist/init` directory.
+
+For generic linux with SystemD support:
+
+```bash
+cp dist/init/linux-systemd/bs440.service /etc/systemd/system/
+systemctl daemon-reload   # tell SystemD to detect new service files
+systemctl start bs440     # start the service now
+systemctl enable bs440    # start the service at boot
+journalctl -l -f -u bs440 # show + tail the logs of bs440
+```
+
+Attention: the systemd service file assumes you copied the contents of this repo to `/opt/BS440`
 
 # Plugins
 Currenly these plugins are available:
@@ -49,7 +74,7 @@ To enable a plugin, add it to the `plugins` key in `BS440.ini`.
 
 Directions on how to install prerequisites, configure and use a specific plugin is found
 in the Wiki
-  
+
 ## BS440mail
 Maintainer: Keptenkurk
 
@@ -58,13 +83,13 @@ Last 3 results are mailed to the user mail adress as configured in BS440mail.ini
 ## BS440csv
 Maintainer: DjZU
 
-Data is added to a local CSV file. Data is presented by running plotBS440.py which 
+Data is added to a local CSV file. Data is presented by running plotBS440.py which
 starts a webserver and serves graphs to the user.
 
 ## Domoticz
 Maintainer: Tristan79 - Status: Testing
 
-Configure the Domoticz and user details in BS440domoticz.ini.  
+Configure the Domoticz and user details in BS440domoticz.ini.
 When data is received, the sensors will be automatically generated. That easy!
 
 The optional option _hardware_name_ is the name of the dummy hardware to you can use,
@@ -91,5 +116,5 @@ repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 * Raudi, Remb0, Edmundo
 
 # Disclaimer
-This software is built out of personal interest and not related to 
+This software is built out of personal interest and not related to
 Medisana AG in any way.
