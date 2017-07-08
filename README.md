@@ -108,6 +108,11 @@ BS440google updates weight and fat parameters in Google fit (http://fit.google.c
 For creating an account and authentication file please see the Wiki for this
 repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 
+# Stand-alone web server
+
+You can use any web server to serve a static site based on the `csv` files. You can find a
+working example using the Caddy webserver in [dist/caddy/](dist/caddy/).
+
 # Thanks to
 * Christopher Peplin - maintainer of Pygatt
 * Tristan79 - Domoticz plugin

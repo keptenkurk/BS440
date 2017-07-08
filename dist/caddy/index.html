@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+body { font: 12px Arial;}
+
+path { 
+	stroke-width: 2;
+	fill: none;
+}
+
+.grid line {
+	stroke: #999;
+}
+
+.axisY1 text{
+	fill: black;
+}
+
+.axisY2 text{
+        fill: #911eb4;
+}
+
+
+.label {
+	font-size: 1.1em;
+	stroke-width: 1;
+	fill: none;
+}
+
+</style>
+<body>
+
+	<!-- load the d3.js library -->    
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+
+	<script>
+function findGetParameter(parameterName) {
+	var result = null,
+	tmp = [];
+	location.search
+		.substr(1)
+		.split("&")
+		.forEach(function (item) {
+			tmp = item.split("=");
+			if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+		});
+	return result;
+}
+
+function row2map(row) {
+	var objMap = {};
+	objMap.timestamp = new Date(+row[0] * 1000);
+	objMap.gewicht = +row[1];
+	objMap.vet = +row[2];
+	objMap.spieren = +row[3];
+	objMap.botten = +row[4];
+	objMap.water = +row[5];
+	objMap.kcal = +row[6];
+	objMap.bmi = +row[7];
+	return objMap;
+}
+
+var code = "nl-NL";
+var p = findGetParameter('p');
+var days_back = 30;
+var start_time = Date.now() - days_back*24*3600*1000 // days_back days ago
+
+var attribute_hash = {
+	"gewicht": {
+		"legend": "Gewicht (kg)",
+		"stroke": "#e6194b",
+		"axis": "y"
+	},
+	"vet": {
+		"legend": "Vet (%)",
+		"stroke": "#3cb44b",
+		"axis": "y"
+	},
+	"spieren": {
+		"legend": "Vet (%)",
+		"stroke": "#ffe119",
+		"axis": "y"
+	},
+	"botten": {
+		"legend": "Botten (kg)",
+		"stroke": "#0082c8",
+		"axis": "y"
+	},
+	"water": {
+		"legend": "Water (%)",
+		"stroke": "#f58231",
+		"axis": "y"
+	},
+	"kcal": {
+		"legend": "Verbruik (kCal)",
+		"stroke": "#911eb4",
+		"axis": "y2"
+	},
+	"bmi": {
+		"legend": "BMI",
+		"stroke": "46f0f0",
+		"axis": "y"
+	}
+}
+
+locale = {
+	"dateTime": "%a %e %B %Y %T",
+	"date": "%d-%m-%Y",
+	"time": "%H:%M:%S",
+	"periods": [ "AM", "PM" ],
+	"days": [ "zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag" ],
+	"shortDays": [ "zo", "ma", "di", "wo", "do", "vr", "za" ],
+	"months": [ "januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december" ],
+	"shortMonths": [ "jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec" ]
+};
+
+d3.timeFormatDefaultLocale(locale);
+var margin = {top: 20, right: 40, bottom: 50, left: 50},
+		width = 960 - margin.left - margin.right,
+		height = 500 - margin.top - margin.bottom;
+
+// Set the ranges
+var x = d3.scaleTime().range([0, width]);
+var y = d3.scaleLinear().range([height, 0]);
+var y2 = d3.scaleLinear().range([height, 0]);
+
+// Define the axes
+var xAxis = d3.axisBottom().scale(x).tickSize(10, 0).tickFormat(d3.timeFormat("%d %B")).ticks(days_back);
+var yAxis = d3.axisLeft(y).scale(y).ticks(20);
+var y2Axis = d3.axisRight(y2).scale(y2).ticks(20);
+
+// Adds the svg canvas
+var svg = d3.select("body")
+.append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", 
+		"translate(" + margin.left + "," + margin.top + ")");
+
+// Gridline
+var gridX = d3.axisTop()
+	.tickFormat("")
+.tickSize(-height)
+	.scale(x);
+
+	// Gridline
+var gridY = d3.axisLeft()
+	.tickFormat("")
+.tickSize(-width)
+	.scale(y);
+
+	d3.text("csvs/" + p + ".csv", function(text) {
+		var data = d3.csvParseRows(text).map(function(row) {
+			return row2map(row);
+		})
+		.filter(function(row){
+			return row.timestamp >= start_time;
+		})
+		.sort(function(a, b) {
+			return d3['ascending'](a.timestamp, b.timestamp);
+		});
+
+		// Scale the range of the data
+		x.domain([d3.min(data, function(d) { return d.timestamp; }), Date.now()]);
+		y.domain([0, d3.max(data, function(d) { return d.gewicht * 1.2; })]);
+		y2.domain([0, d3.max(data, function(d) { return d.kcal * 1.1; })]);
+
+		// Add the X Axis
+		svg.append("g")
+			.attr("class", "xaxis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis)
+			.selectAll("text")  
+			.style("text-anchor", "end")
+			.attr("dx", "-.8em")
+			.attr("dy", ".15em")
+			.attr("transform", "rotate(-65)" );
+
+		// Add the left Y Axis
+		svg.append("g")
+			.attr("class", "axisY1")
+			.call(yAxis);
+
+		// Add the right Y Axis
+		svg.append("g")
+			.attr("class", "axisY2")
+			.attr("transform", "translate(" + width + " ,0)")	
+			.call(y2Axis);
+
+		// Gridline
+		var gridX = d3.axisTop()
+			.tickFormat("")
+			.tickSize(-height)
+			.scale(x);
+
+		svg.append("g")
+			.attr("class", "grid")
+			.call(gridX);
+
+		svg.append("g")
+			.attr("class", "grid")
+			.call(gridY);
+
+		for (var a in attribute_hash) {
+			var color = attribute_hash[a]['stroke'];
+			var axis = window[attribute_hash[a]['axis']];
+			var legend = attribute_hash[a]['legend'];
+			var f = d3.line().curve(d3.curveMonotoneX).x(function(d) { return x(d.timestamp); }).y(function(d) { return axis(d[a]); });
+			svg.append("path").attr("class", "line").style("stroke", color).attr("d", f(data));
+			svg.append("text")
+				.attr("transform", "translate("+(width-3)+","+axis(data[0][a])+")")
+				.attr("dy", "-.5em")
+				.attr("text-anchor", "end")
+				.style("fill", color)
+				.text(legend);
+		}
+
+	});
+	</script>
+</body>

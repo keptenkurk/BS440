@@ -1,0 +1,13 @@
+:5440 {
+	root /opt/site
+		log stdout
+		errors stderr
+}
+:5440/csvs/ {
+	root /opt/BS440/plugins/BS440csv
+		log stdout
+		errors stderr
+		header / Cache-Control "no-store, must-revalidate"
+		header / Pragma "no-cache"
+		header / Expires "0"
+}
