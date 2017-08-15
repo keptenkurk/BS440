@@ -4,6 +4,35 @@
 # About:
 # Send collected data via MQTT (e.g. to Home Assistant)
 #
+# The corresponding configuration for Home Assistant looks like:
+
+# sensor:
+#     - platform: mqtt
+#       state_topic: "bs440/person1/"
+#       name: "Weight Person 1"
+#       unit_of_measurement: "kg"
+#       value_template: '{{ value_json.weight }}'
+#     - platform: mqtt
+#       state_topic: "bs440/person1/"
+#       name: "Body Water Person 1"
+#       unit_of_measurement: "%"
+#       value_template: '{{ value_json.tbw }}'
+#     - platform: mqtt
+#       state_topic: "bs440/person1/"
+#       name: "Body fat Person 1"
+#       unit_of_measurement: "%"
+#       value_template: '{{ value_json.fat }}'
+#     - platform: mqtt
+#       state_topic: "bs440/person1/"
+#       name: "Muscle Mass Person 1"
+#       unit_of_measurement: "%"
+#       value_template: '{{ value_json.muscle }}'
+#     - platform: mqtt
+#       state_topic: "bs440/person1/"
+#       name: "Bone Mass Person 1"
+#       unit_of_measurement: "kg"
+#       value_template: '{{ value_json.bone }}'
+
 import logging
 import os
 import json
