@@ -8,7 +8,8 @@ with a full step-by-step installation instruction on
 https://keptenkurk.wordpress.com/2017/03/05/connecting-the-medisana-bs440-bluetooth-scale-epilogue/
 
 # Prerequisites
-* Installed Pygatt 3.0.0 release
+* Installed Pygatt >= 3.0.0 release
+  WARNING: Pygatt 3.1.1 has been reported to work but Pygatt 3.2 fails to show all characteristics (26-1-2018)
 * Installed BLE adapter
 * Installed Bluez
 
