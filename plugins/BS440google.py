@@ -152,16 +152,17 @@ class Plugin:
         FATD = {'dataName': 'com.google.body.fat.percentage',
         'fieldFormat': 'floatPoint', 'fieldName': 'percentage'}        
         personsection = 'Person' + str(weightdata[0]['person'])
-        scaleuser = pluginconfig.get(personsection, 'username')
-        googleauthfile = pluginconfig.get(personsection, 'googleauthfile')
-        log.info('Updating Google Fit for user %s with weight %s and google authfile: %s' %
-                 (scaleuser, weightdata[0]['weight'], googleauthfile))
-        try:
-            self.googleClient = self.GetGoogleClient(googleauthfile)
-            self.AddGoogle(self.googleClient, weightdata[0]['weight'], WEIGHTD, googleauthfile)
-            self.AddGoogle(self.googleClient, bodydata[0]['fat'], FATD, googleauthfile)
-        except:
-            log.error('Unable to update Google Fit: Error sending data.')
+        if config.has_section(personsection):           
+            scaleuser = pluginconfig.get(personsection, 'username')
+            googleauthfile = pluginconfig.get(personsection, 'googleauthfile')
+            log.info('Updating Google Fit for user %s with weight %s and google authfile: %s' %
+                     (scaleuser, weightdata[0]['weight'], googleauthfile))
+            try:
+                self.googleClient = self.GetGoogleClient(googleauthfile)
+                self.AddGoogle(self.googleClient, weightdata[0]['weight'], WEIGHTD, googleauthfile)
+                self.AddGoogle(self.googleClient, bodydata[0]['fat'], FATD, googleauthfile)
+            except:
+                log.error('Unable to update Google Fit: Error sending data.')
 
         # finally end this plugin execution with
         log.info('Finished plugin: ' + __name__)
