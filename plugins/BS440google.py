@@ -152,7 +152,7 @@ class Plugin:
         FATD = {'dataName': 'com.google.body.fat.percentage',
         'fieldFormat': 'floatPoint', 'fieldName': 'percentage'}        
         personsection = 'Person' + str(weightdata[0]['person'])
-        if config.has_section(personsection):           
+        if pluginconfig.has_section(personsection):           
             scaleuser = pluginconfig.get(personsection, 'username')
             googleauthfile = pluginconfig.get(personsection, 'googleauthfile')
             log.info('Updating Google Fit for user %s with weight %s and google authfile: %s' %
