@@ -238,6 +238,11 @@ if device_model == 'BS410':
     # On BS410 time=0 equals 1/1/2010. 
     # time_offset is used to convert to unix standard
     time_offset = 1262304000
+elif device_model == 'BS444':
+    addresstype = pygatt.BLEAddressType.random
+    # On BS410 time=0 equals 1/1/2010. 
+    # time_offset is used to convert to unix standard
+    time_offset = 1262304000
 else:
     addresstype = pygatt.BLEAddressType.random
     time_offset = 0
