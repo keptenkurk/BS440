@@ -66,14 +66,20 @@ class Plugin:
         for k in tags.keys():
                 del payload[k]
 
+        ts = payload['timestamp']
+        del payload['timestamp']
+
         influx_msg = {
                 'measurement': self.measurement_name,
                 'fields': payload,
-                'tags': tags,
-                'time_precision': 's'
+                'time': ts
         }
 
         logger.info('Publishing data of person {}'.format(person_id))
         logger.debug('Influx msg: {}'.format(json.dumps(influx_msg)))
 
-        self.influx_client.write_points([influx_msg])
+        self.influx_client.write_points(
+                points = [influx_msg],
+                time_precision = 's',
+                tags = tags
+        )
