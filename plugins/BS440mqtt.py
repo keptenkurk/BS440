@@ -36,6 +36,7 @@
 import logging
 import os
 import json
+import ssl
 
 from ConfigParser import SafeConfigParser
 import paho.mqtt.publish as publish
@@ -67,6 +68,15 @@ class Plugin:
                           'hostname': mqtt_config['hostname'],
                           'port': mqtt_config['port'],
                           'retain': True}
+
+        tls = {}
+        if 'tls_cert' in mqtt_config:
+            tls['ca_certs'] = mqtt_config['tls_cert']
+        if 'tls_version' in mqtt_config:
+            tls['tls_version'] = ssl.__getattribute__(mqtt_config['tls_version'])
+        if len(tls) > 0:
+            self.mqtt_args['tls'] = tls
+
         if 'username' in mqtt_config:
             self.mqtt_args['auth'] = {'username': mqtt_config['username'],
                                       'password': mqtt_config['password']}
