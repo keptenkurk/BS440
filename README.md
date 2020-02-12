@@ -124,7 +124,7 @@ For creating an account and authentication file please see the Wiki for this
 repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 
 ## BS440runalizel
-maintainer: jovandginste
+maintainer: jovandeginste
 This plugin stores data to local Runalyze database. Runalyze is a performance analyzer for atlethes which goes far beyond the performance trackers like runkeeper and runtastic. 
 
 
