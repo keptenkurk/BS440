@@ -68,6 +68,8 @@ Currenly these plugins are available:
 * BS440domoticz: Store data in virtual sensors of Domoticz home control system
 * BS440google: Store data to Google Fit account
 * BS440runalizel: Store data to local Runalyze database
+* BS440mqtt: Send collected data via MQTT to Home Assistant for excample
+* BS440influxdb: Store collected data into InfluxDB time series database for easy graphing using Grafana
 
 Plugins are found in the plugin folder and named BS440pluginname.py. Each plugin uses
 its private .ini file named BS440pluginname.ini
@@ -86,6 +88,18 @@ Maintainer: DjZU
 
 Data is added to a local CSV file. Data is presented by running plotBS440.py which
 starts a webserver and serves graphs to the user.
+You can use any web server to serve a static site based on the `csv` files. You can find a
+working example using the Caddy webserver in [dist/caddy/](dist/caddy/).
+
+## BS440mqtt
+Maintainer: jinnerbichler
+
+Send collected data via MQTT (e.g. to Home Assistant)
+
+## BS440influxdb
+Maintainer: qistoph
+
+Store collected data in InlfuxDB (e.g. for Grafana)
 
 ## Domoticz
 Maintainer: Tristan79 - Status: Testing
@@ -103,22 +117,25 @@ while the other sensors are identified by _idx_ in _BS440domoticz.ini_.
 ![domoticz](https://raw.githubusercontent.com/Tristan79/BS440/master/BS440domoticz.png)
 
 ## BS440google
-maintainer: managementboy - Status: Testing
+maintainer: managementboy / Keptenkurk
 
 BS440google updates weight and fat parameters in Google fit (http://fit.google.com)
 For creating an account and authentication file please see the Wiki for this
 repository.(https://github.com/keptenkurk/BS440/wiki/How-to-use-Google-Fit)
 
-# Stand-alone web server
+## BS440runalizel
+maintainer: jovandginste
+This plugin stores data to local Runalyze database. Runalyze is a performance analyzer for atlethes which goes far beyond the performance trackers like runkeeper and runtastic. 
 
-You can use any web server to serve a static site based on the `csv` files. You can find a
-working example using the Caddy webserver in [dist/caddy/](dist/caddy/).
 
 # Thanks to
 * Christopher Peplin - maintainer of Pygatt
 * Tristan79 - Domoticz plugin
 * DjZU - CSV plugin
 * managementboy - Google plugin
+* jovandeginste - Runalyze plugin
+* jinnerbichler - MQTT plugin
+* qistoph - InfluxDB plugin and MQTT plugin
 * Raudi, Remb0, Edmundo
 
 # Disclaimer
