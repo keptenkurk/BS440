@@ -8,6 +8,7 @@ import logging
 import os
 import json
 import ssl
+import datetime as dt
 from influxdb import InfluxDBClient
 
 from configparser import ConfigParser
@@ -45,6 +46,12 @@ class Plugin:
 
         logger.debug('tags: ' + ','.join(self.tags))
 
+    def timestamp_from_resultset(self, point):
+        d = dt.datetime.strptime(point['time'], '%Y-%m-%dT%H:%M:%SZ')
+        d = d.replace(tzinfo=dt.timezone.utc)
+        ts = dt.datetime.timestamp(d)
+        return ts
+
     def execute(self, globalconfig, persondata, weightdata, bodydata):
         """ Publishes weight and body data """
 
@@ -52,34 +59,52 @@ class Plugin:
             logger.error('Invalid data...')
             return
 
+        if len(weightdata) != len(bodydata):
+            logger.error("Lengths of weightdata and bodydata don't match")
+            return
+
         person_id = str(persondata[0]['person'])
 
-        # construct payload
-        model = globalconfig.get('Scale', 'device_model')
-        payload = dict(weightdata[0])
-        payload.update(bodydata[0])
-        payload.update(persondata[0])
-        payload['model'] = model
+        rs = self.influx_client.query("SELECT LAST(weight) FROM "+self.measurement_name+" WHERE person = $person", bind_params={'person':person_id})
+        points = list(rs.get_points())
+        if len(points) > 0:
+            last_time = self.timestamp_from_resultset(next(rs.get_points()))
+        else:
+            last_time = 0
+        logger.debug('Getting results after {}'.format(last_time))
 
-        tags = {k: v for k, v in payload.items() if k in self.tags}
-        print(tags)
-        for k in tags.keys():
-                del payload[k]
+        for n in range(len(weightdata), 0, -1):
+            idx = n - 1
+            if weightdata[idx]['timestamp'] <= last_time:
+                continue
 
-        ts = payload['timestamp']
-        del payload['timestamp']
+            logger.debug("Updating data from {}".format(weightdata[idx]['timestamp']))
 
-        influx_msg = {
-                'measurement': self.measurement_name,
-                'fields': payload,
-                'time': ts
-        }
+            # construct payload
+            model = globalconfig.get('Scale', 'device_model')
+            payload = dict(weightdata[idx])
+            payload.update(bodydata[idx])
+            payload.update(persondata[0])
+            payload['model'] = model
 
-        logger.info('Publishing data of person {}'.format(person_id))
-        logger.debug('Influx msg: {}'.format(json.dumps(influx_msg)))
+            tags = {k: v for k, v in payload.items() if k in self.tags}
+            for k in tags.keys():
+                    del payload[k]
 
-        self.influx_client.write_points(
-                points = [influx_msg],
-                time_precision = 's',
-                tags = tags
-        )
+            ts = payload['timestamp']
+            del payload['timestamp']
+
+            influx_msg = {
+                    'measurement': self.measurement_name,
+                    'fields': payload,
+                    'time': ts
+            }
+
+            logger.info('Publishing data of person {}'.format(person_id))
+            logger.debug('Influx msg: {}'.format(json.dumps(influx_msg)))
+
+            self.influx_client.write_points(
+                    points = [influx_msg],
+                    time_precision = 's',
+                    tags = tags
+            )
