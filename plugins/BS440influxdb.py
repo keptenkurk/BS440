@@ -66,7 +66,11 @@ class Plugin:
         person_id = str(persondata[0]['person'])
 
         rs = self.influx_client.query("SELECT LAST(weight) FROM "+self.measurement_name+" WHERE person = $person", bind_params={'person':person_id})
-        last_time = self.timestamp_from_resultset(next(rs.get_points()))
+        points = list(rs.get_points())
+        if len(points) > 0:
+            last_time = self.timestamp_from_resultset(next(rs.get_points()))
+        else:
+            last_time = 0
         logger.debug('Getting results after {}'.format(last_time))
 
         for n in range(len(weightdata), 0, -1):
