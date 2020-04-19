@@ -1,0 +1,11 @@
+# Coding:
+# --- means less for the past 3 weights
+# --+ means latest weight was higher
+# +++ means higher for the past 3 weights
+---Real good! Keep up!
+---Well done!
+--+Watch out!
+-++Come on, get yourself together
+-+-Ok, keep up now
++-+Hey, whats that?
+---Ouch, you're hurting me
