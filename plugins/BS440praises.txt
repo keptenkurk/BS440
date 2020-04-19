@@ -1,0 +1,51 @@
+# Coding:
+# --- means less for the past 3 weights
+# --+ means latest weight was higher
+# +++ means higher for the past 3 weights
+---Wow! Je bent goed bezig hoor!
+---Het gaat goed. Houd vol.
+---Voelt al beter he?
+---Kun je het al in de spiegel zien? Houd vol!
+---Yes yes yes... Gaat goed!
+---Knap hoor!
+---Ja hoor! Gaat lekker zo...
+--+Kan gebeuren. Pak de draad weer op.
+--+Niks aan de hand. Maar nu weer even opletten...
+--+Hey! Opletten hoor!
+--+Oops... Vandaag weer even minderen...
+--+Ouch! Kan iedereen overkomen. Nu weer aan de bak.
+--+Geen paniek. Vandaag een brammetje minder
+-+-Gelukkig! Je hebt de draad weer opgepakt!
+-+-Goed bezig. Je zit weer op het goede spoor.
+-+-Je kunt het. Zie je wel?
+-+-Yes! En nu volhouden!
+-+-Joehoee. You did it!
+-+-Mooooi. Daar wordt ik blij van.
++--Mooi hoor! Gaat lekker zo
++--Prima gedaan. De weegschaal is trots op je.
++--En dóór... Gaat lekker zo.
++--Knap hoor. Ik.zie al een Killerbody
++--Hoppaaa en dóór!
++--Yeah zo mogen we het zien!
++-+Hey, wacht even! Wel bij de les blijven hoor!
++-+Blijf opletten hoor
++-+Wait a minute! Niet inkakken nu!
++-+Weer even serieus nu. Je kunt het.
++-+Kom op, niet het bijltje erbij neer gooien!
++++Auw! Je doet de weegschaal pijn!
++++Nou klaar ermee. Dit kan echt niet
++++Hou eens op zeg. Pak jezelf op!
++++Dat kan beter hoor!
++++Hmmm... Ok zeg even niks...
+-++Klaar nu! Opnieuw aan de slag. Je kunt het.
+-++Kom op! Het is nog niet te laat.
+-++Pak jezelf op. Je kunt het, dat weet ik.
+-++Hey wat is dat nou! Kom op. Ff serieus weer.
+-++Dat hadden we niet afgesproken... Klaar nu!
+++-Gelukkig! Er is nog hoop.
+++-En nu volhouden he?
+++-En we gáán er weer voor
+++-Mooi dat is beter zo!
+++-Come on baby, you can do it!
+++-Yes you can!
+++-Op naar een killerbody

@@ -5,6 +5,7 @@ import email
 import logging
 from ConfigParser import SafeConfigParser
 import os
+import random
 
 
 class Plugin:
@@ -38,7 +39,34 @@ class Plugin:
                 color = green
         return color
 
+    def praise(self, praisefilename, dataset):
+        praisestr = ''
+        # open praises file if any
+        if praisefilename != '':
+            try:
+                praisefile = open(praisefilename, "r")
+                # select aproriate praises
+                valstr3 = dataset[3]['weight']
+                valstr2 = dataset[2]['weight']
+                valstr1 = dataset[1]['weight']
+                valstr0 = dataset[0]['weight']
+                selectstr = '---'
+                selectlst = list(selectstr)
+                if valstr2 > valstr3: selectlst[0] = '+'
+                if valstr1 > valstr2: selectlst[1] = '+'
+                if valstr0 > valstr1: selectlst[2] = '+'
+                selectstr = ''.join(selectlst)
+                praiselines = []
+                for line in praisefile:
+                    if line[0:3] == selectstr:
+                        praiselines.append(line[3:])
+                if len(praiselines)>0:
+                    praisestr = praiselines[random.randint(0,len(praiselines)-1)]
+            except IOError:
+                praisestr = ''
+        return praisestr
 
+        
     def rowdata(self, header, dataset, property, bib):
         if property == 'timestamp':
             valstr2 = self.TimeToString(dataset[2][property])
@@ -47,22 +75,23 @@ class Plugin:
             rowstr = '<tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>' % (
                       header, valstr2, valstr1, valstr0)
         else:
+            valstr3 = dataset[3][property]
             valstr2 = dataset[2][property]
             valstr1 = dataset[1][property]
             valstr0 = dataset[0][property]
+            color2 = self.printcolor(dataset[2][property], dataset[3][property], bib)
             color1 = self.printcolor(dataset[1][property], dataset[2][property], bib)
             color0 = self.printcolor(dataset[0][property], dataset[1][property], bib)
-            rowstr = '<tr><td>%s</td><td>%s</td>' \
+            rowstr = '<tr><td>%s</td>' \
+                     '<td><font color=%s>%s</font></td>' \
                      '<td><font color=%s>%s</font></td>' \
                      '<td><font color=%s>%s</font></td></tr>' % (
-                      header, valstr2, color1, valstr1, color0, valstr0)
+                      header, color2, valstr2, color1, valstr1, color0, valstr0)
         return rowstr
 
 
     def execute(self, config, persondata, weightdata, bodydata):
- #       self.persondata = persondata
- #       self.weightdata = weightdata
- #       self.bodydata = bodydata
+
         # --- part of plugin skeleton
         log = logging.getLogger(__name__)
         log.info('Starting plugin: ' + __name__)
@@ -96,6 +125,10 @@ class Plugin:
         if pluginconfig.has_section(personsection):
             ToName = pluginconfig.get(personsection, 'username')
             ToAddr = [pluginconfig.get(personsection, 'useremail')]
+            if pluginconfig.has_option(personsection, 'Praises'):
+                praisefilename = pluginconfig.get(personsection, 'Praises')
+            else:
+                praisefilename = '' 
         else:
             log.error('Unable to send mail: No details found in ini file '
                       'for person %d' % (persondata[0]['person']))
@@ -104,11 +137,11 @@ class Plugin:
         # calculate bmi data list
         calculateddata = []
         size = persondata[0]['size'] / 100.00
-        for i in range(0, 3):
+        for i in range(0, 4):
             bmiDict = {}
             bmiDict['bmi'] = round(weightdata[i]['weight'] / (size * size), 1)
             calculateddata.append(bmiDict)
-            
+
 
         # Build HTML e-mail content
         content = """
@@ -147,7 +180,7 @@ class Plugin:
                 <table id="t01">%s%s%s%s%s%s%s%s
                 </table>
                 <br>
-                <br>
+                %s<br>
                 Groeten,<br>
                 De weegschaal.<br>
                 </p>
@@ -170,7 +203,8 @@ class Plugin:
          self.rowdata(header='Verbruik (kCal)', dataset=bodydata, property='kcal',
                  bib=False),
          self.rowdata(header='BMI', dataset=calculateddata, property='bmi',
-                 bib=False))
+                 bib=False),
+         self.praise(praisefilename, dataset=weightdata))
 
         msg = email.mime.Multipart.MIMEMultipart()
         msg['Subject'] = 'Je nieuwe gewicht'
