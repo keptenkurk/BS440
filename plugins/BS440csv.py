@@ -7,7 +7,7 @@
 __author__ = 'DjZU'
 __email__ = "djzu89@gmail.com"
 __license__ = "EUPL-1.1"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 __status__ = "Production"
 #
 #------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ class Plugin:
 		if os.path.isfile(csvPath):
 			try:
 				# read CSV
-				with open(csvPath, 'rb') as csvfile:
+				with open(csvPath, 'rt') as csvfile:
 					weightreader = csv.reader(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 					csvlist = list(weightreader)
 
@@ -60,7 +60,7 @@ class Plugin:
 
 		try:
 			# update CSV
-			with open(csvPath, 'ab') as csvfile:
+			with open(csvPath, 'at') as csvfile:
 				weightwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 				for i, e in reversed(list(enumerate(weightdata))):
 					if any(str(weightdata[i]['timestamp']) in s for s in csvlist):

@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Flask web server to serve graphs based on BS440csv plugin of BS440 bluetooth scale monitor
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+WorkingDirectory=/opt/BS440/plugins/BS440webapp
+ExecStart=/usr/bin/python BS440flask.py
+
+[Install]
+WantedBy=multi-user.target

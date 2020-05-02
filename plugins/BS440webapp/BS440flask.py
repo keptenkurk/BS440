@@ -17,19 +17,19 @@
 __author__ = 'DjZU'
 __email__ = "djzu89@gmail.com"
 __license__ = "EUPL-1.1"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 __status__ = "Production"
 #
 #------------------------------------------------------------------------------------------
 from flask import Flask, request, redirect, render_template, url_for
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 import logging
 import os
 import sys
 
 # BS440webapp config
 dirname = os.path.dirname(__file__)
-config = SafeConfigParser()
+config = ConfigParser()
 config.read('BS440webapp.ini')
 host = config.get('Flask', 'host')
 port = int(config.get('Flask', 'port'))

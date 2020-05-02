@@ -1,7 +1,7 @@
 from __future__ import print_function
 import pygatt.backends
 import logging
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 import time
 import subprocess
 from struct import *
@@ -55,12 +55,12 @@ def decodePerson(handle, values):
 
 def sanitize_timestamp(timestamp):
     retTS = 0
-    if timestamp + time_offset < sys.maxint:
+    if timestamp + time_offset < sys.maxsize:
         retTS = timestamp + time_offset
     else:
         retTS = timestamp
 
-    if timestamp >= sys.maxint:
+    if timestamp >= sys.maxsize:
         retTS = 0
 
     return retTS
@@ -189,10 +189,15 @@ def init_ble_mode():
 '''
 Main program loop
 '''
-config = SafeConfigParser()
+config = ConfigParser()
 config.read('BS440.ini')
 path = "plugins/"
 plugins = {}
+
+# set pygatt log level
+# INFO floods the log file with 'Starting BLE scan', 'Discovered <device>' and 'Found <devices_count> BLE devices'
+# Possible values: NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
+logging.getLogger('pygatt').setLevel(logging.WARNING)
 
 # set up logging
 numeric_level = getattr(logging,

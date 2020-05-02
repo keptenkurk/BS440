@@ -1,13 +1,17 @@
-:5440 {
-	root /opt/site
-		log stdout
-		errors stderr
-}
-:5440/csvs/ {
-	root /opt/BS440/plugins/BS440csv
-		log stdout
-		errors stderr
+# Caddy v2
+
+:5441 {
+	root * /opt/DjZUdevel/BS440/dist/caddy
+	
+	handle /csvs/* {
+		root * /opt/DjZUdevel/BS440/plugins/BS440csv
+		uri strip_prefix /csvs
+		file_server browse
 		header / Cache-Control "no-store, must-revalidate"
 		header / Pragma "no-cache"
 		header / Expires "0"
+	}
+	
+	file_server
+	log
 }
