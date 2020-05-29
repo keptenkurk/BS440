@@ -228,5 +228,6 @@ class Plugin:
         except smtplib.SMTPException as e:
             log.error('Failed to send e-mail:')
             log.error(e)
-
+        except Exception as e:
+            log.error(str(e))
         log.info('Finished plugin: ' + __name__)
