@@ -78,8 +78,8 @@ class Plugin:
         except HttpError, error:
             if 'DataSourceId not found' not in str(error):
                 raise error
-                googleClient.users().dataSources().create(
-                    userId='me', body=dataSource).execute()
+            googleClient.users().dataSources().create(
+                userId='me', body=dataSource).execute()
 
 
     def AddGoogle(self, googleClient, value, typeofdata, googleauthfile):
