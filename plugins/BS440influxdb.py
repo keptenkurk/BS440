@@ -37,7 +37,11 @@ class Plugin:
         influx_config = dict(plugin_config.items('InfluxDB'))
         self.measurement_name = influx_config['measurement']
         self.influx_client = InfluxDBClient(
-                host=influx_config['hostname'], port=int(influx_config['port']), database=influx_config['database'])
+                host=influx_config['hostname'],
+                port=int(influx_config['port']),
+                database=influx_config['database'],
+                username=influx_config.get("username", "root"),
+                password=influx_config.get("password", "root"))
 
         if 'tags' in influx_config:
                 self.tags = [t.strip() for t in influx_config.split(',')]
