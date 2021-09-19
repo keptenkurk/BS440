@@ -9,6 +9,7 @@ import os
 import json
 import ssl
 import datetime as dt
+import pytz
 from influxdb import InfluxDBClient
 
 from configparser import ConfigParser
@@ -37,7 +38,11 @@ class Plugin:
         influx_config = dict(plugin_config.items('InfluxDB'))
         self.measurement_name = influx_config['measurement']
         self.influx_client = InfluxDBClient(
-                host=influx_config['hostname'], port=int(influx_config['port']), database=influx_config['database'])
+                host=influx_config['hostname'],
+                port=int(influx_config['port']),
+                database=influx_config['database'],
+                username=influx_config.get("username", "root"),
+                password=influx_config.get("password", "root"))
 
         if 'tags' in influx_config:
                 self.tags = [t.strip() for t in influx_config.split(',')]
@@ -48,9 +53,19 @@ class Plugin:
 
     def timestamp_from_resultset(self, point):
         d = dt.datetime.strptime(point['time'], '%Y-%m-%dT%H:%M:%SZ')
-        d = d.replace(tzinfo=dt.timezone.utc)
-        ts = dt.datetime.timestamp(d)
+        d = d.replace(tzinfo=pytz.UTC)
+        ts = self.to_timestamp(d)
         return ts
+
+    @staticmethod
+    def to_timestamp(a_date):
+        if a_date.tzinfo:
+            epoch = dt.datetime(1970, 1, 1, tzinfo=pytz.UTC)
+            diff = a_date.astimezone(pytz.UTC) - epoch
+        else:
+            epoch = dt.datetime(1970, 1, 1)
+            diff = a_date - epoch
+        return int(diff.total_seconds())
 
     def execute(self, globalconfig, persondata, weightdata, bodydata):
         """ Publishes weight and body data """
