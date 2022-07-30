@@ -1,7 +1,7 @@
 from __future__ import print_function
 import pygatt.backends
 import logging
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 import time
 import subprocess
 from struct import *
@@ -55,12 +55,12 @@ def decodePerson(handle, values):
 
 def sanitize_timestamp(timestamp):
     retTS = 0
-    if timestamp + time_offset < sys.maxint:
+    if timestamp + time_offset < sys.maxsize:
         retTS = timestamp + time_offset
     else:
         retTS = timestamp
 
-    if timestamp >= sys.maxint:
+    if timestamp >= sys.maxsize:
         retTS = 0
 
     return retTS
@@ -265,11 +265,19 @@ while True:
         weightdata = []
         bodydata = []
         
-        handle_body = device.get_handle(Char_body)
-        handle_person = device.get_handle(Char_person)
-        handle_weight = device.get_handle(Char_weight)
-        handle_command = device.get_handle(Char_command)
-        continue_comms = True
+        try:
+            handle_body = device.get_handle(Char_body)
+            handle_person = device.get_handle(Char_person)
+            handle_weight = device.get_handle(Char_weight)
+            handle_command = device.get_handle(Char_command)
+            continue_comms = True
+        except pygatt.exceptions.NotConnectedError:
+            log.warn('Error getting handles')
+            continue_comms = False
+
+        log.info('Continue Comms: ' + str(continue_comms))
+        if (not continue_comms): continue
+
         '''
         subscribe to characteristics and have processIndication
         process the data received.
