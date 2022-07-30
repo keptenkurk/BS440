@@ -116,6 +116,11 @@ def decodeBody(handle, values):
     retDict["bone"] = (0x0fff & data[7])/10.0
     return retDict
 
+def appendBmi(size, weightdata):
+    size = size / 100.00
+    for element in weightdata:
+        element['bmi'] = round(element['weight'] / (size * size), 1)
+
 
 def processIndication(handle, values):
     '''
@@ -324,6 +329,7 @@ while True:
                 if persondata and weightdata and bodydata:
                     # Sort scale output by timestamp to retrieve most recent three results
                     weightdatasorted = sorted(weightdata, key=lambda k: k['timestamp'], reverse=True)
+                    appendBmi(persondata[0]['size'], weightdata)
                     bodydatasorted = sorted(bodydata, key=lambda k: k['timestamp'], reverse=True)
                     
                     # Run all plugins found
