@@ -1,6 +1,6 @@
 # BS440 - Description
 BS440 is a Python code that listens for information from a Medisana BS410/BS430/BS440/BS444
-or compatible bluetooth bathroom scale. When received via Bluetooth LE , it passes the
+or compatible bluetooth bathroom scale (BSA45 allegedly supported, but manual adjustments needed / not yet correctly implemented in code). When received via Bluetooth LE, it passes the
 information (weight, fat, bone mass, etc) over to all activated plugins for further processing.
 
 Currently supported plugins / data processors:
@@ -46,21 +46,38 @@ Before using this app, rename `BS440.example.ini` to `BS440.ini` and personalize
 This file contains the general parameters for communicating with the scale (Bluetooth LE
 MAC address) and which plugins to use.
 
-# Automatically start
+# Run the script at startup
+For the script to start automatically at system startup (to monitor the scale all the time)
+the script has to be started as a service.
 
-Copy the right files from the `dist/init` directory.
+Open the service-file `bs440.service` located under `<...>/BS440-HA-AD/dist/init/linux-systemd/bs440.service`
+and edit/verify the `WorkingDirectory` (the absolute path where the script's files are stored), the
+python directory (usually `/usr/bin/python`) as well as the name of the script (default `BS440.py`).
 
-For generic linux with SystemD support:
-
+Copy the service-file (for generic linux with SystemD support) from
+`<...>/BS440-HA-AD/dist/init/linux-systemd/bs440.service` to `/etc/systemd/system`:
 ```bash
-cp dist/init/linux-systemd/bs440.service /etc/systemd/system/
-systemctl daemon-reload   # tell SystemD to detect new service files
-systemctl start bs440     # start the service now
-systemctl enable bs440    # start the service at boot
-journalctl -l -f -u bs440 # show + tail the logs of bs440
+cp <...>/BS440-HA-AD/dist/init/linux-systemd/bs440.service /etc/systemd/system/
 ```
 
-Attention: the systemd service file assumes you copied the contents of this repo to `/opt/BS440`
+Tell SystemD to detect new service files:
+```bash
+systemctl daemon-reload 
+```
+
+Start the service now:
+```bash
+systemctl start bs440
+```
+Set the service to start at boot:
+```bash
+systemctl enable bs440
+```
+The logs of the new bs440 service can be shown at all times via ```journalctl -l -f -u bs440```.
+
+If the service runs without any problem if started manually (```systemctl start bs440```) but not
+as a service during startup, check /var/log/syslog for errors. E.g. when activating the mqtt-plugin,
+other services, have to be started first. This can be achieved by setting ```After=multi-user.target```.
 
 # Plugins
 Currenly these plugins are available:
