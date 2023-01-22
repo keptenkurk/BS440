@@ -50,14 +50,14 @@ MAC address) and which plugins to use.
 For the script to start automatically at system startup (to monitor the scale all the time)
 the script has to be started as a service.
 
-Open the service-file `bs440.service` located under `<...>/BS440-HA-AD/dist/init/linux-systemd/bs440.service`
+Open the service-file `bs440.service` located under `<...>/BS440/dist/init/linux-systemd/bs440.service`
 and edit/verify the `WorkingDirectory` (the absolute path where the script's files are stored), the
 python directory (usually `/usr/bin/python`) as well as the name of the script (default `BS440.py`).
 
 Copy the service-file (for generic linux with SystemD support) from
-`<...>/BS440-HA-AD/dist/init/linux-systemd/bs440.service` to `/etc/systemd/system`:
+`<...>/BS440/dist/init/linux-systemd/bs440.service` to `/etc/systemd/system`:
 ```bash
-cp <...>/BS440-HA-AD/dist/init/linux-systemd/bs440.service /etc/systemd/system/
+cp <...>/BS440/dist/init/linux-systemd/bs440.service /etc/systemd/system/
 ```
 
 Tell SystemD to detect new service files:
