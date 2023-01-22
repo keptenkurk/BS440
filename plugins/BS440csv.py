@@ -28,14 +28,7 @@ class Plugin:
 		csvPath = os.path.join(dirname, csvFile)
 		csvDir = os.path.dirname(csvPath)
 
-		# calculate BMI data list
-		calculateddata = []
 		datetimedata = []
-		size = persondata[0]['size'] / 100.00
-		for i, e in list(enumerate(weightdata)):
-			bmiDict = {}
-			bmiDict['bmi'] = round(weightdata[i]['weight'] / (size * size), 1)
-			calculateddata.append(bmiDict)
 
 		if os.path.isfile(csvPath):
 			try:
@@ -66,7 +59,7 @@ class Plugin:
 					if any(str(weightdata[i]['timestamp']) in s for s in csvlist):
 						pass
 					else:
-						weightwriter.writerow([str(weightdata[i]['timestamp']), str(weightdata[i]['weight']), str(bodydata[i]['fat']), str(bodydata[i]['muscle']), str(bodydata[i]['bone']), str(bodydata[i]['tbw']), str(bodydata[i]['kcal']), str(calculateddata[i]['bmi'])])
+						weightwriter.writerow([str(weightdata[i]['timestamp']), str(weightdata[i]['weight']), str(bodydata[i]['fat']), str(bodydata[i]['muscle']), str(bodydata[i]['bone']), str(bodydata[i]['tbw']), str(bodydata[i]['kcal']), str(weightdata[i]['bmi'])])
 
 				log.info('CSV successfully updated for person %s' % personID)
 
