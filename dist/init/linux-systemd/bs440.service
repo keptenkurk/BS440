@@ -6,6 +6,8 @@ Wants=network-online.target systemd-networkd-wait-online.service
 [Service]
 WorkingDirectory=/opt/BS440
 ExecStart=/usr/bin/python BS440.py
+Restart=always
+RestartSec=15
 
 [Install]
 WantedBy=multi-user.target
