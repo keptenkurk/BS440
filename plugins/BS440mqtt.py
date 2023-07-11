@@ -120,6 +120,9 @@ class Plugin:
             return
 
         person_id = str(persondata[0]['person'])
+        person_identifier = "person" + person_id
+        if (person_identifier in self.ad_config):
+            person_identifier = self.ad_config[person_identifier]
 
         # construct payload
         model = globalconfig.get('Scale', 'device_model')
@@ -127,12 +130,9 @@ class Plugin:
         payload.update(bodydata[0])
         payload.update(persondata[0])
         payload['model'] = model
+        payload['name'] = person_identifier
 
         if  self.ad_config["ha_auto_discovery"]:
-            person_identifier = "person" + person_id
-            if (person_identifier in self.ad_config):
-                person_identifier = self.ad_config[person_identifier]
-    
             self.broadcast_auto_discovery(model, person_identifier)
 
             logger.info('Publishing data of person {}'.format(person_id))
@@ -140,6 +140,6 @@ class Plugin:
                        payload=json.dumps(payload),
                        **self.mqtt_args)
         else:
-            publish.single(topic='bs440/person{}/'.format(person_id),
+            publish.single(topic='{}/{}/'.format(model.lower(), person_identifier.lower()),
                        payload=json.dumps(payload),
                        **self.mqtt_args)
