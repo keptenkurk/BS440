@@ -91,12 +91,12 @@ class Plugin:
     def broadcast_auto_discovery(self, model, person):
         model_lower = model.lower()
         measurements = [
-            {"ha_value": "weight", "scale_value": "weight", "name": "Weight", "icon": "scale-bathroom", "unit": "kg"},
+            {"ha_value": "weight", "scale_value": "weight", "name": "Weight", "icon": "scale-bathroom", "unit": "kg", "class": "weight"},
             {"ha_value": "calories", "scale_value": "kcal", "name": "Calories", "icon": "fire", "unit": "kcal"},
             {"ha_value": "fat", "scale_value": "fat", "name": "Fat", "icon": "account-group", "unit": "%"},
             {"ha_value": "water", "scale_value": "tbw", "name": "Water Ratio", "icon": "water-opacity", "unit": "%"},
             {"ha_value": "muscle", "scale_value": "muscle", "name": "Muscle Ratio", "icon": "weight-lifter", "unit": "%"},
-            {"ha_value": "bone", "scale_value": "bone", "name": "Bone Mass", "icon": "bone", "unit": "kg"},
+            {"ha_value": "bone", "scale_value": "bone", "name": "Bone Mass", "icon": "bone", "unit": "kg", "class": "weight"},
             {"ha_value": "bmi", "scale_value": "bmi", "name": "BMI", "icon": "calculator-variant-outline", "unit": ""}
         ]
         for measurement in measurements:
@@ -104,7 +104,9 @@ class Plugin:
             measurement_identifier = identifier + "_" + measurement["ha_value"]
             device = {"mdl": model, "name": model + " " + person, "mf": "Medisana", "identifiers": [identifier]}
             ad_topic = 'homeassistant/sensor/{}/{}/config'.format(identifier, measurement["ha_value"])
-            ad_payload = {"name": measurement["name"], "value_template": "{{{{ value_json.{} }}}}".format(measurement["scale_value"]), "unit_of_measurement": measurement["unit"], "icon":"mdi:" + measurement["icon"], "state_topic": "homeassistant/sensor/{}/state".format(identifier), "object_id": measurement_identifier, "unique_id": measurement_identifier, "device": device }
+            ad_payload = {"name": measurement["name"], "value_template": "{{{{ value_json.{} }}}}".format(measurement["scale_value"]), "unit_of_measurement": measurement["unit"], "icon":"mdi:" + measurement["icon"], "state_topic": "homeassistant/sensor/{}/state".format(identifier), "object_id": measurement_identifier, "unique_id": measurement_identifier, "device": device, "state_class": "measurement" }
+            if "class" in measurement:
+                ad_payload["device_class"] = measurement["class"]
             logger.info('Publishing Auto Discovery for {}'.format(measurement["scale_value"]))
             logger.debug(ad_topic)
             logger.debug(str(ad_payload))
